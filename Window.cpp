@@ -2,11 +2,20 @@
 
 const char* window_title = "GLFW Starter Project";
 Cube * cube;
+SkyBox * skybox;
+
 GLint shaderProgram;
+GLint skyboxShaderProgram;
 
 // On some systems you need to change this to the absolute path
 #define VERTEX_SHADER_PATH "../shader.vert"
 #define FRAGMENT_SHADER_PATH "../shader.frag"
+
+#define SKY_VERTEX_SHADER_PATH "../skyboxShader.vert"
+#define SKY_FRAGMENT_SHADER_PATH "../skyboxShader.frag"
+#define SKYBOX_FACE_DIR "../skybox/"
+//std::string SKYBOX_DIR = "../skybox/";
+
 
 // Default camera parameters
 glm::vec3 cam_pos(0.0f, 0.0f, 20.0f);		// e  | Position of camera
@@ -23,8 +32,18 @@ void Window::initialize_objects()
 {
 	cube = new Cube();
 
+	std::vector<const GLchar*> faces;
+	faces.push_back(SKYBOX_FACE_DIR "right.jpg");
+	faces.push_back(SKYBOX_FACE_DIR "left.jpg");
+	faces.push_back(SKYBOX_FACE_DIR "top.jpg");
+	faces.push_back(SKYBOX_FACE_DIR "bottom.jpg");
+	faces.push_back(SKYBOX_FACE_DIR "back.jpg");
+	faces.push_back(SKYBOX_FACE_DIR "front.jpg");
+	skybox = new SkyBox(faces);
+
 	// Load the shader program. Make sure you have the correct filepath up top
 	shaderProgram = LoadShaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
+	skyboxShaderProgram = LoadShaders(SKY_VERTEX_SHADER_PATH, SKY_FRAGMENT_SHADER_PATH);
 }
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
@@ -106,10 +125,10 @@ void Window::display_callback(GLFWwindow* window)
 	// Clear the color and depth buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	// Use the shader of programID
+	glUseProgram(skyboxShaderProgram);
+	skybox->draw(skyboxShaderProgram);
+
 	glUseProgram(shaderProgram);
-	
-	// Render the cube
 	cube->draw(shaderProgram);
 
 	// Gets events, including input such as keyboard and mouse or window resizing

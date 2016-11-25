@@ -12,6 +12,7 @@
 #include <GLFW/glfw3.h>
 #include "Cube.h"
 #include "shader.h"
+#include "SkyBox.h"
 
 class Window
 {
