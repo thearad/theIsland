@@ -13,6 +13,7 @@
 #include "Cube.h"
 #include "shader.h"
 #include "SkyBox.h"
+#include "HeightMap.h"
 
 class Window
 {

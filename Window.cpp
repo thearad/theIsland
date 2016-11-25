@@ -3,6 +3,7 @@
 const char* window_title = "GLFW Starter Project";
 Cube * cube;
 SkyBox * skybox;
+HeightMap* heightmap;
 
 GLint shaderProgram;
 GLint skyboxShaderProgram;
@@ -40,6 +41,10 @@ void Window::initialize_objects()
 	faces.push_back(SKYBOX_FACE_DIR "back.jpg");
 	faces.push_back(SKYBOX_FACE_DIR "front.jpg");
 	skybox = new SkyBox(faces);
+
+	heightmap = new HeightMap();
+	heightmap->genMap(512, 512);
+	heightmap->init();
 
 	// Load the shader program. Make sure you have the correct filepath up top
 	shaderProgram = LoadShaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
@@ -117,7 +122,7 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 void Window::idle_callback()
 {
 	// Call the update function the cube
-	cube->update();
+	//cube->update();
 }
 
 void Window::display_callback(GLFWwindow* window)
@@ -130,6 +135,7 @@ void Window::display_callback(GLFWwindow* window)
 
 	glUseProgram(shaderProgram);
 	cube->draw(shaderProgram);
+	//heightmap->draw(shaderProgram);
 
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();

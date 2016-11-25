@@ -20,16 +20,22 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Cube.h" />
+    <ClInclude Include="..\HeightMap.h" />
     <ClInclude Include="..\main.h" />
+    <ClInclude Include="..\PerlinNoise.h" />
     <ClInclude Include="..\shader.h" />
     <ClInclude Include="..\SkyBox.h" />
+    <ClInclude Include="..\util.h" />
     <ClInclude Include="..\Window.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Cube.cpp" />
+    <ClCompile Include="..\HeightMap.cpp" />
     <ClCompile Include="..\main.cpp" />
+    <ClCompile Include="..\PerlinNoise.cpp" />
     <ClCompile Include="..\shader.cpp" />
     <ClCompile Include="..\SkyBox.cpp" />
+    <ClCompile Include="..\util.cpp" />
     <ClCompile Include="..\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
