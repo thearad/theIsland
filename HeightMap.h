@@ -9,6 +9,8 @@
 #include "glm/gtx/string_cast.hpp"
 
 #include <vector>
+#include <cstdlib>
+#include <time.h> 
 
 using namespace util;
 class HeightMap {
@@ -25,4 +27,5 @@ public:
 	void genMap(int x, int z);
 	void init();
 	void draw(GLuint shaderProgram);
+	void drawNormals(GLuint shaderProgram);
 };

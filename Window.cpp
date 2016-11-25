@@ -7,10 +7,12 @@ HeightMap* heightmap;
 
 GLint shaderProgram;
 GLint skyboxShaderProgram;
+GLint normalsShaderProgram;
 
 // On some systems you need to change this to the absolute path
 #define VERTEX_SHADER_PATH "../shader.vert"
 #define FRAGMENT_SHADER_PATH "../shader.frag"
+#define GEOMETRY_SHADER_PATH "../shader.gs"
 
 #define SKY_VERTEX_SHADER_PATH "../skyboxShader.vert"
 #define SKY_FRAGMENT_SHADER_PATH "../skyboxShader.frag"
@@ -29,6 +31,10 @@ int Window::height;
 glm::mat4 Window::P;
 glm::mat4 Window::V;
 
+bool Window::lbutton_down;
+bool Window::first_time;
+glm::vec3 Window::lastPoint;
+
 void Window::initialize_objects()
 {
 	cube = new Cube();
@@ -43,12 +49,13 @@ void Window::initialize_objects()
 	skybox = new SkyBox(faces);
 
 	heightmap = new HeightMap();
-	heightmap->genMap(512, 512);
+	heightmap->genMap(30, 30);
 	heightmap->init();
 
 	// Load the shader program. Make sure you have the correct filepath up top
 	shaderProgram = LoadShaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
 	skyboxShaderProgram = LoadShaders(SKY_VERTEX_SHADER_PATH, SKY_FRAGMENT_SHADER_PATH);
+	normalsShaderProgram = LoadShaders("../normals.vert", "../normals.frag", "../normals.gs");
 }
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
@@ -132,10 +139,13 @@ void Window::display_callback(GLFWwindow* window)
 
 	glUseProgram(skyboxShaderProgram);
 	skybox->draw(skyboxShaderProgram);
+	
+	glUseProgram(normalsShaderProgram);
+	heightmap->drawNormals(normalsShaderProgram);
 
 	glUseProgram(shaderProgram);
-	cube->draw(shaderProgram);
-	//heightmap->draw(shaderProgram);
+	//cube->draw(shaderProgram);
+	heightmap->draw(shaderProgram);
 
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
@@ -155,4 +165,52 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 			glfwSetWindowShouldClose(window, GL_TRUE);
 		}
 	}
+}
+void Window::mouse_callback(GLFWwindow* window, int button, int action, int mods)
+{
+	if (button == GLFW_MOUSE_BUTTON_LEFT) {
+		if (GLFW_PRESS == action) {
+			lbutton_down = true;
+		}
+		else if (GLFW_RELEASE == action) {
+			lbutton_down = false;
+			first_time = true;
+		}
+	}
+}
+
+void Window::cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
+{
+	glm::vec3 curPoint;
+	if (lbutton_down) {
+		curPoint = getTrackballCoordinates(width, height, glm::vec2(xpos, ypos));
+		if (first_time) {
+			lastPoint = curPoint;
+			first_time = false;
+			return;
+		}
+
+		float angle;
+		// Perform horizontal (y-axis) rotation
+		angle = (float)(lastPoint.x - curPoint.x);
+		cam_pos = glm::vec3(glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(cam_pos, 1.0f));
+		cam_up = glm::vec3(glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(cam_up, 1.0f));
+
+		//Now rotate vertically based on current orientation
+		angle = (float)(curPoint.y - lastPoint.y);
+		glm::vec3 axis = glm::cross((cam_pos - cam_look_at), cam_up);
+		cam_pos = glm::vec3(glm::rotate(glm::mat4(1.0f), angle, axis) * glm::vec4(cam_pos, 1.0f));
+		cam_up = glm::vec3(glm::rotate(glm::mat4(1.0f), angle, axis) * glm::vec4(cam_up, 1.0f));
+		
+		// Now update the camera
+		V = glm::lookAt(cam_pos, cam_look_at, cam_up);
+		lastPoint.x = curPoint.x;
+		lastPoint.y = curPoint.y;
+	}
+}
+
+float persp = 45.f;
+void Window::scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+	persp += yoffset / 20.f;
+	P = glm::perspective(persp, (float)width / (float)height, 0.1f, 1000.0f);
 }
