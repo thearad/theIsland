@@ -25,6 +25,7 @@
     <ClInclude Include="..\PerlinNoise.h" />
     <ClInclude Include="..\shader.h" />
     <ClInclude Include="..\SkyBox.h" />
+    <ClInclude Include="..\Texture.h" />
     <ClInclude Include="..\util.h" />
     <ClInclude Include="..\Window.h" />
   </ItemGroup>
@@ -35,6 +36,7 @@
     <ClCompile Include="..\PerlinNoise.cpp" />
     <ClCompile Include="..\shader.cpp" />
     <ClCompile Include="..\SkyBox.cpp" />
+    <ClCompile Include="..\Texture.cpp" />
     <ClCompile Include="..\util.cpp" />
     <ClCompile Include="..\Window.cpp" />
   </ItemGroup>

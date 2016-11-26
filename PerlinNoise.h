@@ -1,4 +1,5 @@
 #pragma once
+#include <cmath>
 /*
 Utilized to create a height-map for procedural terrain.
 http://stackoverflow.com/questions/4753055/perlin-noise-generation-for-terrain

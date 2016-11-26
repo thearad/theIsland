@@ -49,7 +49,8 @@ void Window::initialize_objects()
 	skybox = new SkyBox(faces);
 
 	heightmap = new HeightMap();
-	heightmap->genMap(30, 30);
+	heightmap->loadTextures();
+	heightmap->genVertices(30, 30);
 	heightmap->init();
 
 	// Load the shader program. Make sure you have the correct filepath up top
@@ -140,8 +141,9 @@ void Window::display_callback(GLFWwindow* window)
 	glUseProgram(skyboxShaderProgram);
 	skybox->draw(skyboxShaderProgram);
 	
-	glUseProgram(normalsShaderProgram);
-	heightmap->drawNormals(normalsShaderProgram);
+	//If you want to see the normals
+	//glUseProgram(normalsShaderProgram);
+	//heightmap->drawNormals(normalsShaderProgram);
 
 	glUseProgram(shaderProgram);
 	//cube->draw(shaderProgram);
