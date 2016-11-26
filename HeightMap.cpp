@@ -44,8 +44,8 @@ void HeightMap::init() {
 
 void HeightMap::loadTextures() {
 	/*TODO: make the textures pass-in-able. Set max # of textures to smth*/
-	string path = "../textures/";
-	std::vector<string> sTextureNames = {
+	std::string path = "../textures/";
+	std::vector<std::string> sTextureNames = {
 		"sand.jpg", "grass_4.jpg", "grass_3.jpg", "grass_rock.jpg", "snow.jpg"
 	};
 	for (int i = 0; i < sTextureNames.size(); i++) {
@@ -90,6 +90,41 @@ void HeightMap::drawNormals(GLuint shaderProgram) {
 
 }
 
+void HeightMap::loadVertices(char* filename) {
+	unsigned char* data = loadPPM(filename, width, height);
+	if (!data || width == 0 || height == 0) {
+		std::cerr << "HeightMap::loadVertices failed - no data read from filename" << std::endl;
+		return;
+	}
+	float y_mid = height / 2;
+	float x_mid = width / 2;
+	float max_width = sqrt(pow(x_mid, 2));
+
+	int index_w = 0, index_h = 0;
+	for (int h = floor(-height / 2); h < floor(height / 2); h++) {
+		for (int w = floor(-width / 2); w < floor(width / 2); w++) {
+
+			float v_h = data[(index_h*width + index_w) * 3]/255.f * 35.f - 2.f;
+
+			float dist_x = pow(0.f - (float)w, 2);
+			float dist_y = pow(0.f - (float)h, 2);
+			float dist = sqrt(dist_x + dist_y);
+			float dist_ratio = dist / max_width;
+
+			float gradient = dist_ratio * dist_ratio;
+			gradient = fmax(0.f, 1.f - gradient);
+
+			vertices.push_back(glm::vec3(w, gradient*abs(v_h), h));
+			index_w++;
+		}
+		index_h++;
+		index_w = 0;
+	}
+	calcNormals();
+	calcIndices();
+	calcTexCoords();
+}
+
 /*
 Generates a x by z heightmap vertices and texture coordinates
 */
@@ -112,7 +147,7 @@ void HeightMap::genVertices(int x, int z) {
 	int index_w = 0, index_h=0;
 	for (int h = -height / 2; h < height / 2; h++) {
 		for (int w = -width / 2; w < width / 2; w++) {
-			double height = pn.GetHeight(index_w, index_h);
+			double v_h = pn.GetHeight(index_w, index_h);
 
 			float dist_x = pow(0.f - (float)w, 2);
 			float dist_y = pow(0.f - (float)h, 2);
@@ -122,7 +157,7 @@ void HeightMap::genVertices(int x, int z) {
 			float gradient = dist_ratio * dist_ratio;
 			gradient = fmax(0.f, 1.f - gradient);
 
-			vertices.push_back(glm::vec3(w, gradient*abs(height), h));
+			vertices.push_back(glm::vec3(w, gradient*abs(v_h), h));
 			index_w++;
 		}
 		index_h++;
@@ -136,9 +171,9 @@ void HeightMap::genVertices(int x, int z) {
 
 void HeightMap::calcNormals() {
 	//http://www.mbsoftworks.sk/index.php?page=tutorials&series=1&tutorial=24
-	vector<std::vector<glm::vec3>> vNormals[2];
+	std::vector<std::vector<glm::vec3>> vNormals[2];
 	for (int i = 0; i < 2; i++) {
-		vNormals[i] = vector< vector<glm::vec3> >(height - 1, vector<glm::vec3>(width - 1));
+		vNormals[i] = std::vector< std::vector<glm::vec3> >(height - 1, std::vector<glm::vec3>(width - 1));
 	}
 	for (int h = 0; h < height - 1; h++) {
 		for (int w = 0; w < width - 1; w++) {

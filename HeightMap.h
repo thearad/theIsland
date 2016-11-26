@@ -1,6 +1,5 @@
 #pragma once
 #include "PerlinNoise.h"
-#include "PerlinNoise2.h"
 #include "util.h"
 #include "Window.h"
 #include "Texture.h"
@@ -36,7 +35,7 @@ public:
 	HeightMap();
 
 	void loadTextures();
-	void loadVertices(); //will load a PPM file
+	void loadVertices(char* filename); //will load a PPM file
 	void genVertices(int x, int z);
 
 	void init();

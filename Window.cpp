@@ -51,6 +51,7 @@ void Window::initialize_objects()
 	heightmap = new HeightMap();
 	heightmap->loadTextures();
 	heightmap->genVertices(30, 30);
+	//heightmap->loadVertices("../terrain/SanDiegoTerrain.ppm");
 	heightmap->init();
 
 	// Load the shader program. Make sure you have the correct filepath up top
