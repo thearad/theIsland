@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 
 #include "Window.h"
+#include "Texture.h"
 
 #define SEA_LEVEL 0.01f
 class Water {

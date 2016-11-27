@@ -49,7 +49,9 @@ void HeightMap::loadTextures() {
 		"sand.jpg", "grass_4.jpg", "grass_3.jpg", "grass_rock.jpg", "snow.jpg"
 	};
 	for (int i = 0; i < sTextureNames.size(); i++) {
-		textures.push_back(Texture(path + sTextureNames[i], "texSampler" + std::to_string(i)));
+		textures.push_back(
+			std::make_pair(Texture(path + sTextureNames[i]), "texSampler" + std::to_string(i))
+		);
 	}
 }
 
@@ -64,8 +66,8 @@ void HeightMap::draw(GLuint shaderProgram) {
 	//See:https://www.opengl.org/wiki/Sampler_(GLSL) under Binding textures to samplers
 	for (int i = 0; i < textures.size(); i++) {
 		glActiveTexture(GL_TEXTURE0 + i); //switches texture bind location to GL_TEXTURE(0+i)
-		glBindTexture(GL_TEXTURE_2D, textures[i].getID()); //bind texture to active location
-		glUniform1i(glGetUniformLocation(shaderProgram, textures[i].getShaderVar().c_str()), i); //sets uniform sampler2D texSampleri's texture bind loc.
+		glBindTexture(GL_TEXTURE_2D, textures[i].first.getID()); //bind texture to active location
+		glUniform1i(glGetUniformLocation(shaderProgram, textures[i].second.c_str()), i); //sets uniform sampler2D texSampleri's texture bind loc.
 
 	}
 

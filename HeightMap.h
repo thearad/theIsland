@@ -23,7 +23,7 @@ private:
 	std::vector < glm::vec3 > normals;
 	std::vector < glm::vec2 > texCoords;
 
-	std::vector <Texture> textures;
+	std::vector <std::pair<Texture, std::string>> textures;
 
 	int width, height;
 
