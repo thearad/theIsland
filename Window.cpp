@@ -4,19 +4,22 @@ const char* window_title = "GLFW Starter Project";
 Cube * cube;
 SkyBox * skybox;
 HeightMap* heightmap;
+Water* water;
 
 GLint shaderProgram;
 GLint skyboxShaderProgram;
 GLint normalsShaderProgram;
+GLint waterShaderProgram;
 
 // On some systems you need to change this to the absolute path
-#define VERTEX_SHADER_PATH "../shader.vert"
-#define FRAGMENT_SHADER_PATH "../shader.frag"
-#define GEOMETRY_SHADER_PATH "../shader.gs"
+#define VERTEX_SHADER_PATH "../shaders/heightmap.vert"
+#define FRAGMENT_SHADER_PATH "../shaders/heightmap.frag"
 
-#define SKY_VERTEX_SHADER_PATH "../skyboxShader.vert"
-#define SKY_FRAGMENT_SHADER_PATH "../skyboxShader.frag"
+#define SKY_VERTEX_SHADER_PATH "../shaders/skyboxShader.vert"
+#define SKY_FRAGMENT_SHADER_PATH "../shaders/skyboxShader.frag"
 #define SKYBOX_FACE_DIR "../skybox/"
+
+#define WATER_SHADER_PATH "../shaders/shader"
 //std::string SKYBOX_DIR = "../skybox/";
 
 
@@ -38,6 +41,7 @@ glm::vec3 Window::lastPoint;
 void Window::initialize_objects()
 {
 	cube = new Cube();
+	water = new Water(30, 30);
 
 	std::vector<const GLchar*> faces;
 	faces.push_back(SKYBOX_FACE_DIR "right.jpg");
@@ -57,7 +61,9 @@ void Window::initialize_objects()
 	// Load the shader program. Make sure you have the correct filepath up top
 	shaderProgram = LoadShaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
 	skyboxShaderProgram = LoadShaders(SKY_VERTEX_SHADER_PATH, SKY_FRAGMENT_SHADER_PATH);
-	normalsShaderProgram = LoadShaders("../normals.vert", "../normals.frag", "../normals.gs");
+	normalsShaderProgram = LoadShaders("../shaders/normals.vert", "../shaders/normals.frag", "../shaders/normals.gs");
+	waterShaderProgram = LoadShaders(WATER_SHADER_PATH ".vert", WATER_SHADER_PATH ".frag");
+
 }
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
@@ -149,6 +155,10 @@ void Window::display_callback(GLFWwindow* window)
 	glUseProgram(shaderProgram);
 	//cube->draw(shaderProgram);
 	heightmap->draw(shaderProgram);
+
+	glUseProgram(waterShaderProgram);
+	water->draw(waterShaderProgram);
+
 
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();

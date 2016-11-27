@@ -16,6 +16,12 @@
     <Filter Include="Shaders">
       <UniqueIdentifier>{2ade7ffc-a012-4ad3-9714-17304937fd3e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\skybox">
+      <UniqueIdentifier>{99c8e3c4-c9d5-4b36-b3f0-dcb88562178a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\heightmap">
+      <UniqueIdentifier>{43a08d5a-b8ed-4a41-aadc-4d77fb37027f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Cube.h">
@@ -43,6 +49,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\Texture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Water.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -74,6 +83,9 @@
     <ClCompile Include="..\Texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\Water.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -89,5 +101,61 @@
     <None Include="..\skyboxShader.vert">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="..\normals.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\normals.gs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\normals.vert">
+      <Filter>Shaders</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\skybox\back.JPG">
+      <Filter>Resource Files\skybox</Filter>
+    </Image>
+    <Image Include="..\skybox\bottom.JPG">
+      <Filter>Resource Files\skybox</Filter>
+    </Image>
+    <Image Include="..\skybox\front.jpg">
+      <Filter>Resource Files\skybox</Filter>
+    </Image>
+    <Image Include="..\skybox\left.jpg">
+      <Filter>Resource Files\skybox</Filter>
+    </Image>
+    <Image Include="..\skybox\right.jpg">
+      <Filter>Resource Files\skybox</Filter>
+    </Image>
+    <Image Include="..\skybox\top.jpg">
+      <Filter>Resource Files\skybox</Filter>
+    </Image>
+    <Image Include="..\textures\grass.jpg">
+      <Filter>Resource Files\heightmap</Filter>
+    </Image>
+    <Image Include="..\textures\grass_2.jpg">
+      <Filter>Resource Files\heightmap</Filter>
+    </Image>
+    <Image Include="..\textures\grass_3.jpg">
+      <Filter>Resource Files\heightmap</Filter>
+    </Image>
+    <Image Include="..\textures\grass_4.jpg">
+      <Filter>Resource Files\heightmap</Filter>
+    </Image>
+    <Image Include="..\textures\grass_rock.jpg">
+      <Filter>Resource Files\heightmap</Filter>
+    </Image>
+    <Image Include="..\textures\rock_2_4w.jpg">
+      <Filter>Resource Files\heightmap</Filter>
+    </Image>
+    <Image Include="..\textures\sand.jpg">
+      <Filter>Resource Files\heightmap</Filter>
+    </Image>
+    <Image Include="..\textures\sand_grass_02.jpg">
+      <Filter>Resource Files\heightmap</Filter>
+    </Image>
+    <Image Include="..\textures\snow.jpg">
+      <Filter>Resource Files\heightmap</Filter>
+    </Image>
   </ItemGroup>
 </Project>

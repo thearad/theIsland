@@ -14,6 +14,7 @@
 #include "shader.h"
 #include "SkyBox.h"
 #include "HeightMap.h"
+#include "Water.h"
 
 class Window
 {
