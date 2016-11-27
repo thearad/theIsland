@@ -6,6 +6,11 @@
 #include "Texture.h"
 
 #define SEA_LEVEL 0.01f
+#define REFLECTION_WIDTH 320
+#define REFLECTION_HEIGHT 180
+#define REFRACTION_WIDTH 1280
+#define REFRACTION_HEIGHT 720
+
 class Water {
 private:
 	GLuint VAO, VBO, EBO;
@@ -22,10 +27,16 @@ private:
 		{ 0, 1, 2 },
 		{ 2, 3, 0 }
 	};
+
+	//Frame Buffers
+	GLuint reflectionFBO, reflectionTex, reflectionDBO;
+	GLuint refractionFBO, refractionTex, refractionDTex;
 public:
 	Water(int width, int height);
 	~Water();
 
 	void init();
+	void initFrameBuffers();
+	GLuint creatDepthBuffer(int width, int height);
 	void draw(GLuint shaderProgram);
 };
