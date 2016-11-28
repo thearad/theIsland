@@ -15,6 +15,7 @@
 #include "SkyBox.h"
 #include "HeightMap.h"
 #include "Water.h"
+#include "Camera.h"
 
 class Window
 {
@@ -38,6 +39,8 @@ public:
 	static void mouse_callback(GLFWwindow* window, int button, int action, int mods);
 	static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
 	static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+
+	static void Do_Movement();
 
 };
 

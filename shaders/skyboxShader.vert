@@ -14,6 +14,6 @@ void main()
 {
     gl_ClipDistance[0]=dot(model* vec4(position, 1.f), clippingPlane);
 
-    gl_Position =   projection * view * model * vec4(position, 1.0);  
+    gl_Position = projection * view * model * vec4(position, 1.0);  
     TexCoords = position;
 }

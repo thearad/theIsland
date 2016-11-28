@@ -9,11 +9,13 @@ uniform mat4 view;
 
 out vec3 Normal;
 out vec3 FragPos;
-out vec2 TexCoord;
+out vec2 TexCoords;
+out vec4 clipSpace;
 
 void main()
 {
-    gl_Position = projection * view * model * vec4(position, 1.f);
+    clipSpace = projection * view * model * vec4(position.x, position.y, position.z, 1.f);;
+    gl_Position = clipSpace;
     
     //http://stackoverflow.com/questions/14196252/rotate-normals-in-shader
     mat3 NormalMatrix = transpose(inverse(mat3(model)));    
@@ -21,5 +23,5 @@ void main()
         
     FragPos = vec3(model * vec4(position, 1.0));
     
-    TexCoord = vec2(position.x/2.0 + 0.5, position.y/2.0 + 0.5);
+    TexCoords = vec2(position.x, position.y);
 }

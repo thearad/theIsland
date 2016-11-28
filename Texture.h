@@ -28,7 +28,9 @@ public:
 		//glTexParameteri settings
 		std::vector<std::pair<GLenum, GLint>> texParams = {
 			std::make_pair(GL_TEXTURE_MIN_FILTER, GL_LINEAR),
-			std::make_pair(GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+			std::make_pair(GL_TEXTURE_MAG_FILTER, GL_LINEAR),
+			std::make_pair(GL_TEXTURE_WRAP_S, GL_REPEAT),
+			std::make_pair(GL_TEXTURE_WRAP_T, GL_REPEAT)
 		}
 	);
 

@@ -130,7 +130,7 @@ void HeightMap::loadVertices(char* filename) {
 Generates a x by z heightmap vertices and texture coordinates
 */
 void HeightMap::genVertices(int x, int z) {
-	srand((unsigned int)time(NULL));
+	//srand((unsigned int)time(NULL));
 	PerlinNoise pn(0.05, 0.2f, 35.f, 5, rand() % 100);
 	width = x;
 	height = z;

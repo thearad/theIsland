@@ -7,6 +7,9 @@ Water::Water(int width, int height) {
 	vertices.push_back(glm::vec3(l, SEA_LEVEL, u));
 	vertices.push_back(glm::vec3(l, SEA_LEVEL, d));
 	vertices.push_back(glm::vec3(r, SEA_LEVEL, d));
+	
+	this->width = width;
+	this->height = height;
 
 	init();
 	initFrameBuffers();
@@ -90,6 +93,7 @@ void Water::bindFrameBuffer(int type) {
 		std::cerr << "Water::bindFrameBuffer - invalid type" << std::endl;
 		return;
 	}
+	//std::cout << "buf: " << buf << " w " << w << " h " << h << std::endl;
 	glBindTexture(GL_TEXTURE_2D, 0);//To make sure the texture isn't bound
 	glBindFramebuffer(GL_FRAMEBUFFER, buf);
 	glViewport(0, 0, w, h);
@@ -105,6 +109,8 @@ void Water::draw(GLuint shaderProgram) {
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &Window::P[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &Window::V[0][0]);
+	glUniform1i(glGetUniformLocation(shaderProgram, "quad_width"), width);
+	glUniform1i(glGetUniformLocation(shaderProgram, "quad_height"), height);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, reflectionTex);
@@ -117,4 +123,8 @@ void Water::draw(GLuint shaderProgram) {
 	glBindVertexArray(VAO);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
+}
+
+void Water::genTexCoords() {
+
 }

@@ -22,11 +22,9 @@ GLint waterShaderProgram;
 #define WATER_SHADER_PATH "../shaders/shader"
 //std::string SKYBOX_DIR = "../skybox/";
 
-
-// Default camera parameters
-glm::vec3 cam_pos(0.0f, 0.0f, 20.0f);		// e  | Position of camera
-glm::vec3 cam_look_at(0.0f, 0.0f, 0.0f);	// d  | This is where the camera looks at
-glm::vec3 cam_up(0.0f, 1.0f, 0.0f);			// up | What orientation "up" is
+Camera camera(glm::vec3(0.0f, 5.0f, 30.0f));
+bool keys[1024];
+GLfloat deltaTime = 0.0f, lastFrame = 0.0f;
 
 int Window::width;
 int Window::height;
@@ -129,8 +127,8 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 
 	if (height > 0)
 	{
-		P = glm::perspective(45.0f, (float)width / (float)height, 0.1f, 1000.0f);
-		V = glm::lookAt(cam_pos, cam_look_at, cam_up);
+		V = camera.GetViewMatrix();
+		P = glm::perspective(camera.Zoom, (float)width / (float)height, 0.1f, 1000.0f);
 	}
 }
 
@@ -140,32 +138,28 @@ void Window::idle_callback()
 	//cube->update();
 }
 
-glm::vec4 clip_above = glm::vec4(0.f, -1.f, 0.f, 0.01f);
-glm::vec4 clip_below = glm::vec4(0.f, 1.f, 0.f, -0.01f);
+glm::vec4 refract_clip = glm::vec4(0.f, -1.f, 0.f, 0.01f);
+glm::vec4 reflect_clip = glm::vec4(0.f, 1.f, 0.f, -0.01f);
 void Window::display_callback(GLFWwindow* window)
 {
 	//ENABLE PLANE CLIPPING FOR WATER REFLECTION/REFRACTION
 	glEnable(GL_CLIP_DISTANCE0);
-
-	//FIRST PASS ... WATER REFRACTION
+	
+	//DUMMY RENDER------------------------------------------------------------------------
+	///*WEIRD....VERY WEIRD issue where the first pass rendering NEVER gets rendered...*/
 	water->bindFrameBuffer(Water::REFRACTION);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	glUniform4f(glGetUniformLocation(shaderProgram, "clippingPlane"), clip_above.x, clip_above.y, clip_above.z, clip_above.w);
-	glUniform4f(glGetUniformLocation(skyboxShaderProgram, "clippingPlane"), clip_above.x, clip_above.y, clip_above.z, clip_above.w);
-
 	glUseProgram(skyboxShaderProgram);
 	skybox->draw(skyboxShaderProgram);
 
 	glUseProgram(shaderProgram);
 	heightmap->draw(shaderProgram);
 
-	//SECOND PASS ... WATER REFLECTION
-	water->bindFrameBuffer(Water::REFLECTION);
+	////WATER REFRACTION--------------------------------------------------------------------------------------
+	water->bindFrameBuffer(Water::REFRACTION);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glUniform4f(glGetUniformLocation(shaderProgram, "clippingPlane"), clip_below.x, clip_below.y, clip_below.z, clip_below.w);
-	glUniform4f(glGetUniformLocation(skyboxShaderProgram, "clippingPlane"), clip_below.x, clip_below.y, clip_below.z, clip_below.w);
+	glUniform4f(glGetUniformLocation(shaderProgram, "clippingPlane"), refract_clip.x, refract_clip.y, refract_clip.z, refract_clip.w);
+	glUniform4f(glGetUniformLocation(skyboxShaderProgram, "clippingPlane"), refract_clip.x, refract_clip.y, refract_clip.z, refract_clip.w);
 
 	glUseProgram(skyboxShaderProgram);
 	skybox->draw(skyboxShaderProgram);
@@ -175,10 +169,20 @@ void Window::display_callback(GLFWwindow* window)
 
 	//DISABLE PLANE CLIPPING FOR NORMAL RENDERING PASS
 	glDisable(GL_CLIP_DISTANCE0);
-
-	//THIRD PASS ... RENDER SCENE NORMALLY
-	water->unbindFrameBuffer();
+	V = camera.GetViewMatrix();
+	
+	//WATER REFLECTION------------------------------------------------------------------------
+	water->bindFrameBuffer(Water::REFLECTION);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	float dist = 2 * camera.Position.y - 0.01f;
+	camera.Position.y -= dist;
+	camera.Pitch *= -1;
+	camera.updateCameraVectors();
+	V = camera.GetViewMatrix();
+
+	glUniform4f(glGetUniformLocation(shaderProgram, "clippingPlane"), reflect_clip.x, reflect_clip.y, reflect_clip.z, reflect_clip.w);
+	glUniform4f(glGetUniformLocation(skyboxShaderProgram, "clippingPlane"), reflect_clip.x, reflect_clip.y, reflect_clip.z, reflect_clip.w);
 
 	glUseProgram(skyboxShaderProgram);
 	skybox->draw(skyboxShaderProgram);
@@ -186,11 +190,34 @@ void Window::display_callback(GLFWwindow* window)
 	glUseProgram(shaderProgram);
 	heightmap->draw(shaderProgram);
 
+	camera.Position.y += dist;
+	camera.Pitch *= -1;
+	camera.updateCameraVectors();
+	V = camera.GetViewMatrix();
+
+	//THIRD PASS ... RENDER SCENE NORMALLY----------------------------------------------------------------------------
+	water->unbindFrameBuffer();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	
+	glUseProgram(skyboxShaderProgram);
+	skybox->draw(skyboxShaderProgram);
+
+	glUseProgram(shaderProgram);
+	heightmap->draw(shaderProgram);
+	
 	glUseProgram(waterShaderProgram);
 	water->draw(waterShaderProgram);
 
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
+
+	GLfloat currentFrame = glfwGetTime();
+	deltaTime = currentFrame - lastFrame;
+	lastFrame = currentFrame;
+	Do_Movement();
+
+	V = camera.GetViewMatrix();
+	P = glm::perspective(camera.Zoom, (float)width / (float)height, 0.1f, 1000.0f);
 	// Swap buffers
 	glfwSwapBuffers(window);
 }
@@ -206,6 +233,15 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 			// Close the window. This causes the program to also terminate.
 			glfwSetWindowShouldClose(window, GL_TRUE);
 		}
+
+	}
+	if (key >= 0 && key < 1024)
+	{
+		if (action == GLFW_PRESS) {
+			keys[key] = true;
+		}
+		else if (action == GLFW_RELEASE)
+			keys[key] = false;
 	}
 }
 void Window::mouse_callback(GLFWwindow* window, int button, int action, int mods)
@@ -221,38 +257,36 @@ void Window::mouse_callback(GLFWwindow* window, int button, int action, int mods
 	}
 }
 
+void Window::Do_Movement()
+{
+	// Camera controls
+	if (keys[GLFW_KEY_W])
+		camera.ProcessKeyboard(FORWARD, deltaTime);
+	if (keys[GLFW_KEY_S])
+		camera.ProcessKeyboard(BACKWARD, deltaTime);
+	if (keys[GLFW_KEY_A])
+		camera.ProcessKeyboard(LEFT, deltaTime);
+	if (keys[GLFW_KEY_D])
+		camera.ProcessKeyboard(RIGHT, deltaTime);
+}
 void Window::cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
 {
-	glm::vec3 curPoint;
-	if (lbutton_down) {
-		curPoint = getTrackballCoordinates(width, height, glm::vec2(xpos, ypos));
-		if (first_time) {
-			lastPoint = curPoint;
-			first_time = false;
-			return;
-		}
-
-		float angle;
-		// Perform horizontal (y-axis) rotation
-		angle = (float)(lastPoint.x - curPoint.x);
-		cam_pos = glm::vec3(glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(cam_pos, 1.0f));
-		cam_up = glm::vec3(glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(cam_up, 1.0f));
-
-		//Now rotate vertically based on current orientation
-		angle = (float)(curPoint.y - lastPoint.y);
-		glm::vec3 axis = glm::cross((cam_pos - cam_look_at), cam_up);
-		cam_pos = glm::vec3(glm::rotate(glm::mat4(1.0f), angle, axis) * glm::vec4(cam_pos, 1.0f));
-		cam_up = glm::vec3(glm::rotate(glm::mat4(1.0f), angle, axis) * glm::vec4(cam_up, 1.0f));
-		
-		// Now update the camera
-		V = glm::lookAt(cam_pos, cam_look_at, cam_up);
-		lastPoint.x = curPoint.x;
-		lastPoint.y = curPoint.y;
+	if (first_time)
+	{
+		lastPoint.x = xpos;
+		lastPoint.y = ypos;
+		first_time = false;
 	}
+
+	GLfloat xoffset = xpos - lastPoint.x;
+	GLfloat yoffset = lastPoint.y - ypos;  // Reversed since y-coordinates go from bottom to left
+
+	lastPoint.x = xpos;
+	lastPoint.y = ypos;
+
+	camera.ProcessMouseMovement(xoffset, yoffset);
 }
 
-float persp = 45.f;
 void Window::scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
-	persp += yoffset / 20.f;
-	P = glm::perspective(persp, (float)width / (float)height, 0.1f, 1000.0f);
+	camera.ProcessMouseScroll(yoffset/10.f);
 }

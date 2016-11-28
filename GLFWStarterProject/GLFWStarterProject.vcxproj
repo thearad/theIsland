@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Camera.h" />
     <ClInclude Include="..\Cube.h" />
     <ClInclude Include="..\HeightMap.h" />
     <ClInclude Include="..\main.h" />
@@ -31,6 +32,7 @@
     <ClInclude Include="..\Window.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Camera.cpp" />
     <ClCompile Include="..\Cube.cpp" />
     <ClCompile Include="..\HeightMap.cpp" />
     <ClCompile Include="..\main.cpp" />

@@ -91,4 +91,12 @@ namespace util {
 		fclose(fp);
 		return data;
 	}
+
+	float getPitch(glm::vec3 cam_pos, glm::vec3 cam_look_at, glm::vec3 cam_up) {
+		float dx = cam_pos.x - cam_look_at.x;
+		float dy = cam_pos.y - cam_look_at.y;
+		float dz = cam_pos.z - cam_look_at.z;
+		float pitch = atan2(sqrt(dz*dz + dx*dx), dy);
+		return pitch;
+	}
 }

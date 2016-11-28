@@ -15,6 +15,8 @@ class Water {
 private:
 	GLuint VAO, VBO, EBO;
 
+	int width, height;
+
 	//vertices to create a quad
 	std::vector<glm::vec3> vertices = {
 		glm::vec3( 1.0f, SEA_LEVEL,  1.0f ),
@@ -45,4 +47,6 @@ public:
 	void unbindFrameBuffer();
 
 	void draw(GLuint shaderProgram);
+
+	void genTexCoords();
 };
