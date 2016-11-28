@@ -56,9 +56,13 @@ GLuint SkyBox::loadCubeMap(std::vector<const GLchar*> faces) {
 
 void SkyBox::draw(GLuint shaderProgram) {
 	glDepthMask(GL_FALSE);
+
+	glm::mat4 model = glm::mat4(1.0);
 	glm::mat4 view = glm::mat4(glm::mat3(Window::V));	// Remove any translation component of the view matrix
 	glm::mat4 projection = Window::P;
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "modelview"), 1, GL_FALSE, glm::value_ptr(view));
+
+	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
 	glBindVertexArray(skyboxVAO);

@@ -29,14 +29,20 @@ private:
 	};
 
 	//Frame Buffers
+
+public:
 	GLuint reflectionFBO, reflectionTex, reflectionDBO;
 	GLuint refractionFBO, refractionTex, refractionDTex;
-public:
+
+	enum{REFLECTION=0, REFRACTION};
 	Water(int width, int height);
 	~Water();
 
 	void init();
 	void initFrameBuffers();
-	GLuint creatDepthBuffer(int width, int height);
+
+	void bindFrameBuffer(int type);
+	void unbindFrameBuffer();
+
 	void draw(GLuint shaderProgram);
 };

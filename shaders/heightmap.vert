@@ -8,12 +8,16 @@ uniform mat4 projection;
 uniform mat4 model;
 uniform mat4 view;
 
+uniform vec4 clippingPlane;
+
 out vec3 Normal;
 out vec3 FragPos;
 out vec2 TexCoord;
 
 void main()
 {
+    gl_ClipDistance[0]=dot(model* vec4(position, 1.f), clippingPlane);
+
     gl_Position = projection * view * model * vec4(position, 1.f);
     
     //http://stackoverflow.com/questions/14196252/rotate-normals-in-shader

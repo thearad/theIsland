@@ -9,6 +9,7 @@ uniform mat4 view;
 
 out vec3 Normal;
 out vec3 FragPos;
+out vec2 TexCoord;
 
 void main()
 {
@@ -19,4 +20,6 @@ void main()
     Normal = normalize(NormalMatrix * normal);
         
     FragPos = vec3(model * vec4(position, 1.0));
+    
+    TexCoord = vec2(position.x/2.0 + 0.5, position.y/2.0 + 0.5);
 }

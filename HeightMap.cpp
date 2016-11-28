@@ -68,7 +68,6 @@ void HeightMap::draw(GLuint shaderProgram) {
 		glActiveTexture(GL_TEXTURE0 + i); //switches texture bind location to GL_TEXTURE(0+i)
 		glBindTexture(GL_TEXTURE_2D, textures[i].first.getID()); //bind texture to active location
 		glUniform1i(glGetUniformLocation(shaderProgram, textures[i].second.c_str()), i); //sets uniform sampler2D texSampleri's texture bind loc.
-
 	}
 
 	// Draw HeightMap

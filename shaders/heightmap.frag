@@ -4,7 +4,7 @@ in vec3 Normal;
 in vec3 FragPos;
 in vec2 TexCoord;
 
-out vec4 color;
+layout(location = 0) out vec4 color;
 
 uniform sampler2D texSampler0;
 uniform sampler2D texSampler1;

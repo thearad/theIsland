@@ -140,25 +140,52 @@ void Window::idle_callback()
 	//cube->update();
 }
 
+glm::vec4 clip_above = glm::vec4(0.f, -1.f, 0.f, 0.01f);
+glm::vec4 clip_below = glm::vec4(0.f, 1.f, 0.f, 0.01f);
 void Window::display_callback(GLFWwindow* window)
 {
 	// Clear the color and depth buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	//reflection
+	//glEnable(GL_CLIP_DISTANCE0);
+
+	//water->bindFrameBuffer(Water::REFRACTION);
+	//glUniform4f(glGetUniformLocation(shaderProgram, "clippingPlane"), clip_above.x, clip_above.y, clip_above.z, clip_above.w);
+	//glUniform4f(glGetUniformLocation(skyboxShaderProgram, "clippingPlane"), clip_above.x, clip_above.y, clip_above.z, clip_above.w);
+
+	//glUseProgram(skyboxShaderProgram);
+	//skybox->draw(skyboxShaderProgram);
+
+	//glUseProgram(shaderProgram);
+	//heightmap->draw(shaderProgram);
+	//water->unbindFrameBuffer();
+	
+	//refraction
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	water->bindFrameBuffer(Water::REFLECTION);
+	//glUniform4f(glGetUniformLocation(shaderProgram, "clippingPlane"), clip_below.x, clip_below.y, clip_below.z, clip_below.w);
+	//glUniform4f(glGetUniformLocation(skyboxShaderProgram, "clippingPlane"), clip_below.x, clip_below.y, clip_below.z, clip_below.w);
+
+
 	glUseProgram(skyboxShaderProgram);
 	skybox->draw(skyboxShaderProgram);
-	
-	//If you want to see the normals
-	//glUseProgram(normalsShaderProgram);
-	//heightmap->drawNormals(normalsShaderProgram);
 
 	glUseProgram(shaderProgram);
-	//cube->draw(shaderProgram);
 	heightmap->draw(shaderProgram);
+	water->unbindFrameBuffer();
+
+	//glDisable(GL_CLIP_DISTANCE0);
+
+	//normal
+	//glUseProgram(skyboxShaderProgram);
+	//skybox->draw(skyboxShaderProgram);
+
+	//glUseProgram(shaderProgram);
+	//heightmap->draw(shaderProgram);
 
 	glUseProgram(waterShaderProgram);
 	water->draw(waterShaderProgram);
-
 
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
