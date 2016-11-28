@@ -141,48 +141,50 @@ void Window::idle_callback()
 }
 
 glm::vec4 clip_above = glm::vec4(0.f, -1.f, 0.f, 0.01f);
-glm::vec4 clip_below = glm::vec4(0.f, 1.f, 0.f, 0.01f);
+glm::vec4 clip_below = glm::vec4(0.f, 1.f, 0.f, -0.01f);
 void Window::display_callback(GLFWwindow* window)
 {
-	// Clear the color and depth buffers
+	//ENABLE PLANE CLIPPING FOR WATER REFLECTION/REFRACTION
+	glEnable(GL_CLIP_DISTANCE0);
+
+	//FIRST PASS ... WATER REFRACTION
+	water->bindFrameBuffer(Water::REFRACTION);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//reflection
-	//glEnable(GL_CLIP_DISTANCE0);
-
-	//water->bindFrameBuffer(Water::REFRACTION);
-	//glUniform4f(glGetUniformLocation(shaderProgram, "clippingPlane"), clip_above.x, clip_above.y, clip_above.z, clip_above.w);
-	//glUniform4f(glGetUniformLocation(skyboxShaderProgram, "clippingPlane"), clip_above.x, clip_above.y, clip_above.z, clip_above.w);
-
-	//glUseProgram(skyboxShaderProgram);
-	//skybox->draw(skyboxShaderProgram);
-
-	//glUseProgram(shaderProgram);
-	//heightmap->draw(shaderProgram);
-	//water->unbindFrameBuffer();
-	
-	//refraction
-	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	water->bindFrameBuffer(Water::REFLECTION);
-	//glUniform4f(glGetUniformLocation(shaderProgram, "clippingPlane"), clip_below.x, clip_below.y, clip_below.z, clip_below.w);
-	//glUniform4f(glGetUniformLocation(skyboxShaderProgram, "clippingPlane"), clip_below.x, clip_below.y, clip_below.z, clip_below.w);
-
+	glUniform4f(glGetUniformLocation(shaderProgram, "clippingPlane"), clip_above.x, clip_above.y, clip_above.z, clip_above.w);
+	glUniform4f(glGetUniformLocation(skyboxShaderProgram, "clippingPlane"), clip_above.x, clip_above.y, clip_above.z, clip_above.w);
 
 	glUseProgram(skyboxShaderProgram);
 	skybox->draw(skyboxShaderProgram);
 
 	glUseProgram(shaderProgram);
 	heightmap->draw(shaderProgram);
+
+	//SECOND PASS ... WATER REFLECTION
+	water->bindFrameBuffer(Water::REFLECTION);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glUniform4f(glGetUniformLocation(shaderProgram, "clippingPlane"), clip_below.x, clip_below.y, clip_below.z, clip_below.w);
+	glUniform4f(glGetUniformLocation(skyboxShaderProgram, "clippingPlane"), clip_below.x, clip_below.y, clip_below.z, clip_below.w);
+
+	glUseProgram(skyboxShaderProgram);
+	skybox->draw(skyboxShaderProgram);
+
+	glUseProgram(shaderProgram);
+	heightmap->draw(shaderProgram);
+
+	//DISABLE PLANE CLIPPING FOR NORMAL RENDERING PASS
+	glDisable(GL_CLIP_DISTANCE0);
+
+	//THIRD PASS ... RENDER SCENE NORMALLY
 	water->unbindFrameBuffer();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//glDisable(GL_CLIP_DISTANCE0);
+	glUseProgram(skyboxShaderProgram);
+	skybox->draw(skyboxShaderProgram);
 
-	//normal
-	//glUseProgram(skyboxShaderProgram);
-	//skybox->draw(skyboxShaderProgram);
-
-	//glUseProgram(shaderProgram);
-	//heightmap->draw(shaderProgram);
+	glUseProgram(shaderProgram);
+	heightmap->draw(shaderProgram);
 
 	glUseProgram(waterShaderProgram);
 	water->draw(waterShaderProgram);
