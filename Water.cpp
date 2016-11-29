@@ -5,12 +5,14 @@ Water::Water(int width, int height) {
 	vertices.clear();
 	indices.clear();
 
+	//generate vertices
 	for (int h = floor(-height / 2); h < floor(height / 2); h++) {
 		for (int w = floor(-width / 2); w < floor(width / 2); w++) {
 			vertices.push_back(glm::vec3(w, SEA_LEVEL, h));
 		}
 	}
 
+	//generate indices
 	for (int h = 0; h < height - 1; h++) {
 		for (int w = 0; w < width - 1; w++) {
 			indices.push_back(h*width + w);
@@ -23,20 +25,26 @@ Water::Water(int width, int height) {
 		}
 	}
 	
+	//save variables
 	this->width = width;
 	this->height = height;
 
-	init();
-	initFrameBuffers();
-
+	//load wave texture
 	dudv = Texture("../water/waterDUDV.png").getID();
+
+	//initialize everything
+	init();
+	bindData();
+	initFrameBuffers();
 };
 
 void Water::init() {
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 	glGenBuffers(1, &EBO);
+}
 
+void Water::bindData() {
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3)*vertices.size(), &vertices[0].x, GL_STATIC_DRAW);
@@ -107,7 +115,6 @@ void Water::bindFrameBuffer(int type) {
 		std::cerr << "Water::bindFrameBuffer - invalid type" << std::endl;
 		return;
 	}
-	//std::cout << "buf: " << buf << " w " << w << " h " << h << std::endl;
 	glBindTexture(GL_TEXTURE_2D, 0);//To make sure the texture isn't bound
 	glBindFramebuffer(GL_FRAMEBUFFER, buf);
 	glViewport(0, 0, w, h);
@@ -117,21 +124,15 @@ void Water::unbindFrameBuffer() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, Window::width, Window::height);
 }
-void Water::draw(GLuint shaderProgram) {
-	glm::mat4 model = glm::mat4(1.0);
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &Window::P[0][0]);
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &Window::V[0][0]);
+
+void Water::loadShaderData(GLuint shaderProgram) {
+	//Load dynamic data into shader
+	glUniform1i(glGetUniformLocation(shaderProgram, "reflectionTexture"), REFLECTION);
+	glUniform1i(glGetUniformLocation(shaderProgram, "refractionTexture"), REFRACTION);
+	glUniform1i(glGetUniformLocation(shaderProgram, "dudv"), DUDV);
+
 	glUniform1i(glGetUniformLocation(shaderProgram, "quad_width"), width);
 	glUniform1i(glGetUniformLocation(shaderProgram, "quad_height"), height);
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, reflectionTex);
-	glUniform1i(glGetUniformLocation(shaderProgram, "reflectionTexture"), 0);
-
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, refractionTex);
-	glUniform1i(glGetUniformLocation(shaderProgram, "refractionTexture"), 1);
 
 	if (first_draw) {
 		lastTime = glfwGetTime();
@@ -143,18 +144,33 @@ void Water::draw(GLuint shaderProgram) {
 		moveFactor += WAVE_SPEED * (curTime - lastTime);
 		lastTime = curTime;
 	}
-	moveFactor = fmod(moveFactor,1.f);
+	moveFactor = fmod(moveFactor, 1.f);
 	glUniform1f(glGetUniformLocation(shaderProgram, "moveFactor"), moveFactor);
 
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, dudv);
-	glUniform1i(glGetUniformLocation(shaderProgram, "dudv"), 2);
+	glm::mat4 model = glm::mat4(1.0);
+	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &Window::P[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &Window::V[0][0]);
+}
 
+void Water::setActiveTextures() {
+	//Bind textures to be used to active texture locations
+	glActiveTexture(GL_TEXTURE0 + REFLECTION);
+	glBindTexture(GL_TEXTURE_2D, reflectionTex);
+
+	glActiveTexture(GL_TEXTURE0 + REFRACTION);
+	glBindTexture(GL_TEXTURE_2D, refractionTex);
+
+	glActiveTexture(GL_TEXTURE0 + DUDV);
+	glBindTexture(GL_TEXTURE_2D, dudv);
+}
+
+void Water::draw(GLuint shaderProgram) {
+	loadShaderData(shaderProgram);
+	setActiveTextures();
+
+	//render the water quad
 	glBindVertexArray(VAO);
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
-}
-
-void Water::genTexCoords() {
-
 }

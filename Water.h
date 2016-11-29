@@ -10,12 +10,15 @@
 #define REFLECTION_HEIGHT 180
 #define REFRACTION_WIDTH 1280
 #define REFRACTION_HEIGHT 720
+#define WAVE_SPEED 0.03
 
 class Water {
 private:
 	GLuint VAO, VBO, EBO;
-
+	GLuint SHADER_PROG;
 	int width, height;
+
+	GLuint REFL_INDEX = 0, REFR_INDEX = 1, DUDV_INDEX = 2;
 
 	//vertices to create a quad
 	std::vector<glm::vec3> vertices = {
@@ -30,30 +33,31 @@ private:
 		 2, 3, 0
 	};
 
-	//Frame Buffers
+	void bindData();
 
 public:
 	GLuint reflectionFBO, reflectionTex, reflectionDBO;
 	GLuint refractionFBO, refractionTex, refractionDTex;
 	GLuint dudv;
 
-	GLfloat WAVE_SPEED = 0.03f;
 	float moveFactor = 0.f;
 
 	bool first_draw = true;
 	double lastTime;
 
-	enum{REFLECTION=0, REFRACTION};
+	enum{REFLECTION=0, REFRACTION, DUDV};
 	Water(int width, int height);
 	~Water();
 
 	void init();
 	void initFrameBuffers();
+	void initShaderData();
 
 	void bindFrameBuffer(int type);
 	void unbindFrameBuffer();
 	
-	void setDrawData(glm::vec3 camera_pos);
+	void loadShaderData(GLuint shaderProgram);
+	void setActiveTextures();
 	void draw(GLuint shaderProgram);
 
 	void genTexCoords();

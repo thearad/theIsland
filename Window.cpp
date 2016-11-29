@@ -38,25 +38,23 @@ glm::vec3 Window::lastPoint;
 
 void Window::initialize_objects()
 {
-	cube = new Cube();
-	water = new Water(200, 200);
-
-	std::vector<const GLchar*> faces;
-	faces.push_back(SKYBOX_FACE_DIR "right.jpg");
-	faces.push_back(SKYBOX_FACE_DIR "left.jpg");
-	faces.push_back(SKYBOX_FACE_DIR "top.jpg");
-	faces.push_back(SKYBOX_FACE_DIR "bottom.jpg");
-	faces.push_back(SKYBOX_FACE_DIR "back.jpg");
-	faces.push_back(SKYBOX_FACE_DIR "front.jpg");
-	skybox = new SkyBox(faces);
-
-	heightmap = new HeightMap(200, 200);
-
 	// Load the shader program. Make sure you have the correct filepath up top
 	shaderProgram = LoadShaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
 	skyboxShaderProgram = LoadShaders(SKY_VERTEX_SHADER_PATH, SKY_FRAGMENT_SHADER_PATH);
 	normalsShaderProgram = LoadShaders("../shaders/normals.vert", "../shaders/normals.frag", "../shaders/normals.gs");
 	waterShaderProgram = LoadShaders(WATER_SHADER_PATH ".vert", WATER_SHADER_PATH ".frag");
+
+	//Render objects
+	cube = new Cube();
+	water = new Water(200, 200);
+
+	std::vector<const GLchar*> faces = {
+		SKYBOX_FACE_DIR "right.jpg", SKYBOX_FACE_DIR "left.jpg", SKYBOX_FACE_DIR "top.jpg",
+		SKYBOX_FACE_DIR "bottom.jpg", SKYBOX_FACE_DIR "back.jpg", SKYBOX_FACE_DIR "front.jpg"
+	};
+	skybox = new SkyBox(faces);
+
+	heightmap = new HeightMap(200, 200);
 
 }
 
