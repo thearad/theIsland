@@ -1,28 +1,21 @@
 #include "window.h"
 
-const char* window_title = "GLFW Starter Project";
+const char* window_title = "Island";
 Cube * cube;
 SkyBox * skybox;
 HeightMap* heightmap;
 Water* water;
 
-GLint shaderProgram;
+GLint heightmapShaderProgram;
 GLint skyboxShaderProgram;
 GLint normalsShaderProgram;
 GLint waterShaderProgram;
 
 // On some systems you need to change this to the absolute path
-#define VERTEX_SHADER_PATH "../shaders/heightmap.vert"
-#define FRAGMENT_SHADER_PATH "../shaders/heightmap.frag"
-
-#define SKY_VERTEX_SHADER_PATH "../shaders/skyboxShader.vert"
-#define SKY_FRAGMENT_SHADER_PATH "../shaders/skyboxShader.frag"
+#define SHADER_PATH "../shaders/"
 #define SKYBOX_FACE_DIR "../skybox/"
 
-#define WATER_SHADER_PATH "../shaders/shader"
-//std::string SKYBOX_DIR = "../skybox/";
-
-Camera camera(glm::vec3(0.0f, 5.0f, 30.0f));
+Camera camera(glm::vec3(0.0f, 5.0f, 50.0f));
 bool keys[1024];
 GLfloat deltaTime = 0.0f, lastFrame = 0.0f;
 
@@ -39,10 +32,10 @@ glm::vec3 Window::lastPoint;
 void Window::initialize_objects()
 {
 	// Load the shader program. Make sure you have the correct filepath up top
-	shaderProgram = LoadShaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
-	skyboxShaderProgram = LoadShaders(SKY_VERTEX_SHADER_PATH, SKY_FRAGMENT_SHADER_PATH);
-	normalsShaderProgram = LoadShaders("../shaders/normals.vert", "../shaders/normals.frag", "../shaders/normals.gs");
-	waterShaderProgram = LoadShaders(WATER_SHADER_PATH ".vert", WATER_SHADER_PATH ".frag");
+	heightmapShaderProgram = LoadShaders(SHADER_PATH "heightmap.vert", SHADER_PATH "heightmap.frag");
+	skyboxShaderProgram = LoadShaders(SHADER_PATH "skybox.vert", SHADER_PATH "skybox.frag");
+	normalsShaderProgram = LoadShaders(SHADER_PATH "normals.vert", SHADER_PATH "normals.frag", SHADER_PATH "normals.gs");
+	waterShaderProgram = LoadShaders(SHADER_PATH "water.vert", SHADER_PATH "water.frag");
 
 	//Render objects
 	cube = new Cube();
@@ -62,7 +55,7 @@ void Window::initialize_objects()
 void Window::clean_up()
 {
 	delete(cube);
-	glDeleteProgram(shaderProgram);
+	glDeleteProgram(heightmapShaderProgram);
 }
 
 GLFWwindow* Window::create_window(int width, int height)
@@ -132,41 +125,45 @@ void Window::idle_callback()
 	//cube->update();
 }
 
+//renders objects on the scene that require no multirendering
+void Window::render_scene() {
+	glUseProgram(skyboxShaderProgram);
+	skybox->draw(skyboxShaderProgram);
+
+	glUseProgram(heightmapShaderProgram);
+	heightmap->draw(heightmapShaderProgram);
+}
+
+//polls for WASD movements
+void Window::poll_movement() {
+	GLfloat currentFrame = glfwGetTime();
+	deltaTime = currentFrame - lastFrame;
+	lastFrame = currentFrame;
+	Do_Movement();
+}
+
 glm::vec4 refract_clip = glm::vec4(0.f, -1.f, 0.f, 0.01f);
 glm::vec4 reflect_clip = glm::vec4(0.f, 1.f, 0.f, -0.01f);
 void Window::display_callback(GLFWwindow* window)
 {
 	//ENABLE PLANE CLIPPING FOR WATER REFLECTION/REFRACTION
 	glEnable(GL_CLIP_DISTANCE0);
-	
-	//DUMMY RENDER------------------------------------------------------------------------
-	/*WEIRD....VERY WEIRD issue where the first pass rendering NEVER gets rendered...*/
-	water->bindFrameBuffer(Water::REFRACTION);
-	glUseProgram(skyboxShaderProgram);
-	skybox->draw(skyboxShaderProgram);
 
-	glUseProgram(shaderProgram);
-	heightmap->draw(shaderProgram);
-
-	////WATER REFRACTION--------------------------------------------------------------------------------------
+	//FIRST PASS: SAVE TO WATER REFRACTION FBO-----------------------------------------------------------------
 	water->bindFrameBuffer(Water::REFRACTION);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glUniform4f(glGetUniformLocation(shaderProgram, "clippingPlane"), refract_clip.x, refract_clip.y, refract_clip.z, refract_clip.w);
+	glUniform4f(glGetUniformLocation(heightmapShaderProgram, "clippingPlane"), refract_clip.x, refract_clip.y, refract_clip.z, refract_clip.w);
 	glUniform4f(glGetUniformLocation(skyboxShaderProgram, "clippingPlane"), refract_clip.x, refract_clip.y, refract_clip.z, refract_clip.w);
 
-	glUseProgram(skyboxShaderProgram);
-	skybox->draw(skyboxShaderProgram);
-
-	glUseProgram(shaderProgram);
-	heightmap->draw(shaderProgram);
-
-	//DISABLE PLANE CLIPPING FOR NORMAL RENDERING PASS
-	V = camera.GetViewMatrix();
+	render_scene();
 	
-	//WATER REFLECTION------------------------------------------------------------------------
+	//SECOND PASS: SAVE TO WATER REFLECTION FBO------------------------------------------------------------------
 	water->bindFrameBuffer(Water::REFLECTION);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glUniform4f(glGetUniformLocation(heightmapShaderProgram, "clippingPlane"), reflect_clip.x, reflect_clip.y, reflect_clip.z, reflect_clip.w);
+	glUniform4f(glGetUniformLocation(skyboxShaderProgram, "clippingPlane"), reflect_clip.x, reflect_clip.y, reflect_clip.z, reflect_clip.w);
 
 	float dist = 2 * camera.Position.y - 0.01f;
 	camera.Position.y -= dist;
@@ -174,47 +171,34 @@ void Window::display_callback(GLFWwindow* window)
 	camera.updateCameraVectors();
 	V = camera.GetViewMatrix();
 
-	glUniform4f(glGetUniformLocation(shaderProgram, "clippingPlane"), reflect_clip.x, reflect_clip.y, reflect_clip.z, reflect_clip.w);
-	glUniform4f(glGetUniformLocation(skyboxShaderProgram, "clippingPlane"), reflect_clip.x, reflect_clip.y, reflect_clip.z, reflect_clip.w);
-
-	glUseProgram(skyboxShaderProgram);
-	skybox->draw(skyboxShaderProgram);
-
-	glUseProgram(shaderProgram);
-	heightmap->draw(shaderProgram);
+	render_scene();
 
 	camera.Position.y += dist;
 	camera.Pitch *= -1;
 	camera.updateCameraVectors();
 	V = camera.GetViewMatrix();
 
-	//THIRD PASS ... RENDER SCENE NORMALLY----------------------------------------------------------------------------
+	//THIRD PASS: RENDER SCENE NORMALLY ----------------------------------------------------------------------------
 	water->unbindFrameBuffer();
-	glUniform4f(glGetUniformLocation(shaderProgram, "clippingPlane"), 0, 0, 0, 0);
-	glUniform4f(glGetUniformLocation(skyboxShaderProgram, "clippingPlane"), 0, 0, 0, 0);	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	glUniform4f(glGetUniformLocation(heightmapShaderProgram, "clippingPlane"), 0, 0, 0, 0);
+	glUniform4f(glGetUniformLocation(skyboxShaderProgram, "clippingPlane"), 0, 0, 0, 0);
 	glUniform3f(glGetUniformLocation(waterShaderProgram, "camera_Position"), camera.Position.x, camera.Position.y, camera.Position.z);
-	
-	glUseProgram(skyboxShaderProgram);
-	skybox->draw(skyboxShaderProgram);
 
-	glUseProgram(shaderProgram);
-	heightmap->draw(shaderProgram);
+	render_scene();
 	
 	glUseProgram(waterShaderProgram);
 	water->draw(waterShaderProgram);
 
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
+	poll_movement();
 
-	GLfloat currentFrame = glfwGetTime();
-	deltaTime = currentFrame - lastFrame;
-	lastFrame = currentFrame;
-	Do_Movement();
-
+	//update camera and perspective with polled movements
 	V = camera.GetViewMatrix();
 	P = glm::perspective(camera.Zoom, (float)width / (float)height, 0.1f, 1000.0f);
+
 	// Swap buffers
 	glfwSwapBuffers(window);
 }
@@ -222,30 +206,38 @@ void Window::display_callback(GLFWwindow* window)
 bool escape_camera = false;
 void Window::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-	// Check for a key press
+
 	if (action == GLFW_PRESS)
 	{
-		// Check if escape was pressed
-		if (key == GLFW_KEY_ESCAPE)
-		{
-			// Close the window. This causes the program to also terminate.
+		switch (key) {
+		case GLFW_KEY_W:
+		case GLFW_KEY_A:
+		case GLFW_KEY_S:
+		case GLFW_KEY_D:
+			keys[key] = true;
+			break;
+		case GLFW_KEY_ESCAPE:
 			glfwSetWindowShouldClose(window, GL_TRUE);
+			break;
+		case GLFW_KEY_R:
+			heightmap->refresh(200, 200, 20.f);
+			break;
 		}
 
+		if (mods == GLFW_MOD_ALT) {
+			escape_camera = !escape_camera;
+		};
+
 	}
-	if (action == GLFW_PRESS && mods == GLFW_MOD_ALT) {
-		escape_camera = !escape_camera;
-	};
-	if (action == GLFW_PRESS && key == GLFW_KEY_R) {
-		heightmap->refresh();
-	};
-	if (key >= 0 && key < 1024)
-	{
-		if (action == GLFW_PRESS) {
-			keys[key] = true;
-		}
-		else if (action == GLFW_RELEASE)
+	else if (action == GLFW_RELEASE) {
+		switch (key) {
+		case GLFW_KEY_W:
+		case GLFW_KEY_A:
+		case GLFW_KEY_S:
+		case GLFW_KEY_D:
 			keys[key] = false;
+			break;
+		}
 	}
 }
 void Window::mouse_callback(GLFWwindow* window, int button, int action, int mods)

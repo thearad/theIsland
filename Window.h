@@ -33,6 +33,9 @@ public:
 	static GLFWwindow* create_window(int width, int height);
 	static void resize_callback(GLFWwindow* window, int width, int height);
 	static void idle_callback();
+
+	static void render_scene();
+	static void poll_movement();
 	static void display_callback(GLFWwindow*);
 	static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
