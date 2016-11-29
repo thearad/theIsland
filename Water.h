@@ -25,9 +25,9 @@ private:
 		glm::vec3(1.0f, SEA_LEVEL,  -1.0f)
 	};
 
-	GLuint indices[2][3] = {
-		{ 0, 1, 2 },
-		{ 2, 3, 0 }
+	std::vector<GLuint> indices = {
+		 0, 1, 2 ,
+		 2, 3, 0
 	};
 
 	//Frame Buffers
@@ -35,6 +35,13 @@ private:
 public:
 	GLuint reflectionFBO, reflectionTex, reflectionDBO;
 	GLuint refractionFBO, refractionTex, refractionDTex;
+	GLuint dudv;
+
+	GLfloat WAVE_SPEED = 0.03f;
+	float moveFactor = 0.f;
+
+	bool first_draw = true;
+	double lastTime;
 
 	enum{REFLECTION=0, REFRACTION};
 	Water(int width, int height);
@@ -45,7 +52,8 @@ public:
 
 	void bindFrameBuffer(int type);
 	void unbindFrameBuffer();
-
+	
+	void setDrawData(glm::vec3 camera_pos);
 	void draw(GLuint shaderProgram);
 
 	void genTexCoords();

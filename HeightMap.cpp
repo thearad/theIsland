@@ -1,6 +1,19 @@
 #include "HeightMap.h"
 
-HeightMap::HeightMap() {
+HeightMap::HeightMap(char* filename, GLfloat island_size) {
+	ISLAND_SIZE = island_size;
+	loadTextures();
+	init();
+	loadVertices(filename, island_size);
+	bindData();
+}
+
+HeightMap::HeightMap(int width, int height, GLfloat island_size) {
+	ISLAND_SIZE = island_size;
+	loadTextures();
+	init();
+	genVertices(width, height, island_size);
+	bindData();
 }
 
 void HeightMap::init() {
@@ -10,7 +23,9 @@ void HeightMap::init() {
 	glGenBuffers(1, &VBO_tex);
 
 	glGenBuffers(1, &EBO);
+}
 
+void HeightMap::bindData() {
 	glBindVertexArray(VAO);
 
 	//Vertices
@@ -43,10 +58,9 @@ void HeightMap::init() {
 }
 
 void HeightMap::loadTextures() {
-	/*TODO: make the textures pass-in-able. Set max # of textures to smth*/
 	std::string path = "../textures/";
 	std::vector<std::string> sTextureNames = {
-		"sand.jpg", "grass_4.jpg", "grass_3.jpg", "grass_rock.jpg", "snow.jpg"
+		"ocean.jpg", "sand.jpg", "grass_4.jpg", "grass_3.jpg", "grass_rock.jpg", "snow.jpg"
 	};
 	for (int i = 0; i < sTextureNames.size(); i++) {
 		textures.push_back(
@@ -91,7 +105,7 @@ void HeightMap::drawNormals(GLuint shaderProgram) {
 
 }
 
-void HeightMap::loadVertices(char* filename) {
+void HeightMap::loadVertices(char* filename, GLfloat island_size) {
 	unsigned char* data = loadPPM(filename, width, height);
 	if (!data || width == 0 || height == 0) {
 		std::cerr << "HeightMap::loadVertices failed - no data read from filename" << std::endl;
@@ -99,7 +113,7 @@ void HeightMap::loadVertices(char* filename) {
 	}
 	float y_mid = height / 2;
 	float x_mid = width / 2;
-	float max_width = sqrt(pow(x_mid, 2));
+	float max_width = island_size;
 
 	int index_w = 0, index_h = 0;
 	for (int h = floor(-height / 2); h < floor(height / 2); h++) {
@@ -129,36 +143,34 @@ void HeightMap::loadVertices(char* filename) {
 /*
 Generates a x by z heightmap vertices and texture coordinates
 */
-void HeightMap::genVertices(int x, int z) {
-	//srand((unsigned int)time(NULL));
+void HeightMap::genVertices(int x, int z, GLfloat island_size) {
+	srand((unsigned int)time(NULL));
 	PerlinNoise pn(0.05, 0.2f, 35.f, 5, rand() % 100);
+
 	width = x;
 	height = z;
 
 	float y_mid = height / 2;
 	float x_mid = width / 2;
-	float max_distance = sqrt(pow(x_mid, 2) + pow(y_mid, 2));
-	float max_width = sqrt(pow(x_mid, 2));
-
-	std::vector<double> heights;
-
-	double max_height = DBL_MIN;
-	double min_height = DBL_MAX;
+	float max_width = island_size;
 
 	int index_w = 0, index_h=0;
 	for (int h = -height / 2; h < height / 2; h++) {
 		for (int w = -width / 2; w < width / 2; w++) {
-			double v_h = pn.GetHeight(index_w, index_h);
-
 			float dist_x = pow(0.f - (float)w, 2);
 			float dist_y = pow(0.f - (float)h, 2);
-			float dist = sqrt(dist_x + dist_y);
-			float dist_ratio = dist / max_width;
+			float dist_ratio = sqrt(dist_x + dist_y) / max_width;
+			
+			double v_h = pn.GetHeight(index_w, index_h);
 
-			float gradient = dist_ratio * dist_ratio;
-			gradient = fmax(0.f, 1.f - gradient);
+			float gradient = 1.f - (dist_ratio * dist_ratio);
 
-			vertices.push_back(glm::vec3(w, gradient*abs(v_h), h));
+			if (gradient < 0.f) 
+				v_h = -3*sqrt(abs(gradient));
+			else
+				v_h = gradient*abs(v_h);
+
+			vertices.push_back(glm::vec3(w,v_h, h));
 			index_w++;
 		}
 		index_h++;
@@ -248,4 +260,36 @@ void HeightMap::calcTexCoords() {
 			texCoords.push_back(glm::vec2(fTextureU*fScaleC, fTextureV*fScaleR));
 		}
 	}
+}
+
+void HeightMap::refresh(int width, int height, GLfloat island_size) {
+	vertices.clear();
+	normals.clear();
+	indices.clear();
+	if (width == 0 || height == 0 || island_size == 0)
+		genVertices(this->width, this->height, this->ISLAND_SIZE);
+	else {
+		genVertices(width, height, island_size);
+		this->width = width;
+		this->height = height;
+		this->ISLAND_SIZE = island_size;
+	}
+	bindData();
+}
+
+void HeightMap::refresh(char* filename, GLfloat island_size){
+	vertices.clear();
+	normals.clear();
+	indices.clear();
+	if (island_size == 0)
+		loadVertices(filename, this->ISLAND_SIZE);
+	else {
+		loadVertices(filename, island_size);
+		this->ISLAND_SIZE = island_size;
+	}
+	bindData();
+}
+
+void HeightMap::setIslandSize(GLfloat radius) {
+	ISLAND_SIZE = radius;
 }

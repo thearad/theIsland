@@ -3,16 +3,33 @@
 Water::Water(int width, int height) {
 	int l = floor(-width/2), r = floor(width / 2), u = floor(-height / 2), d = floor(height / 2);
 	vertices.clear();
-	vertices.push_back(glm::vec3(r, SEA_LEVEL, u));
-	vertices.push_back(glm::vec3(l, SEA_LEVEL, u));
-	vertices.push_back(glm::vec3(l, SEA_LEVEL, d));
-	vertices.push_back(glm::vec3(r, SEA_LEVEL, d));
+	indices.clear();
+
+	for (int h = floor(-height / 2); h < floor(height / 2); h++) {
+		for (int w = floor(-width / 2); w < floor(width / 2); w++) {
+			vertices.push_back(glm::vec3(w, SEA_LEVEL, h));
+		}
+	}
+
+	for (int h = 0; h < height - 1; h++) {
+		for (int w = 0; w < width - 1; w++) {
+			indices.push_back(h*width + w);
+			indices.push_back((h + 1)*width + w);
+			indices.push_back((h + 1)*width + (w + 1));
+
+			indices.push_back((h + 1)*width + (w + 1));
+			indices.push_back(h*width + (w + 1));
+			indices.push_back(h*width + w);
+		}
+	}
 	
 	this->width = width;
 	this->height = height;
 
 	init();
 	initFrameBuffers();
+
+	dudv = Texture("../water/waterDUDV.png").getID();
 };
 
 void Water::init() {
@@ -27,16 +44,13 @@ void Water::init() {
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (GLvoid*)0);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint)*indices.size(), &indices[0], GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 }
 
-Texture* test;
 void Water::initFrameBuffers() {
-	test = new Texture("../textures/sand.jpg");
-
 	//REFLECTIONS
 	glGenFramebuffers(1, &this->reflectionFBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, this->reflectionFBO);
@@ -103,7 +117,6 @@ void Water::unbindFrameBuffer() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, Window::width, Window::height);
 }
-
 void Water::draw(GLuint shaderProgram) {
 	glm::mat4 model = glm::mat4(1.0);
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &Window::P[0][0]);
@@ -120,8 +133,25 @@ void Water::draw(GLuint shaderProgram) {
 	glBindTexture(GL_TEXTURE_2D, refractionTex);
 	glUniform1i(glGetUniformLocation(shaderProgram, "refractionTexture"), 1);
 
+	if (first_draw) {
+		lastTime = glfwGetTime();
+		moveFactor += WAVE_SPEED * lastTime;
+		first_draw = false;
+	}
+	else {
+		double curTime = glfwGetTime();
+		moveFactor += WAVE_SPEED * (curTime - lastTime);
+		lastTime = curTime;
+	}
+	moveFactor = fmod(moveFactor,1.f);
+	glUniform1f(glGetUniformLocation(shaderProgram, "moveFactor"), moveFactor);
+
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, dudv);
+	glUniform1i(glGetUniformLocation(shaderProgram, "dudv"), 2);
+
 	glBindVertexArray(VAO);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
 }
 

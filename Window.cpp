@@ -39,7 +39,7 @@ glm::vec3 Window::lastPoint;
 void Window::initialize_objects()
 {
 	cube = new Cube();
-	water = new Water(30, 30);
+	water = new Water(200, 200);
 
 	std::vector<const GLchar*> faces;
 	faces.push_back(SKYBOX_FACE_DIR "right.jpg");
@@ -50,11 +50,7 @@ void Window::initialize_objects()
 	faces.push_back(SKYBOX_FACE_DIR "front.jpg");
 	skybox = new SkyBox(faces);
 
-	heightmap = new HeightMap();
-	heightmap->loadTextures();
-	heightmap->genVertices(30, 30);
-	//heightmap->loadVertices("../terrain/SanDiegoTerrain.ppm");
-	heightmap->init();
+	heightmap = new HeightMap(200, 200);
 
 	// Load the shader program. Make sure you have the correct filepath up top
 	shaderProgram = LoadShaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
@@ -146,7 +142,7 @@ void Window::display_callback(GLFWwindow* window)
 	glEnable(GL_CLIP_DISTANCE0);
 	
 	//DUMMY RENDER------------------------------------------------------------------------
-	///*WEIRD....VERY WEIRD issue where the first pass rendering NEVER gets rendered...*/
+	/*WEIRD....VERY WEIRD issue where the first pass rendering NEVER gets rendered...*/
 	water->bindFrameBuffer(Water::REFRACTION);
 	glUseProgram(skyboxShaderProgram);
 	skybox->draw(skyboxShaderProgram);
@@ -168,7 +164,6 @@ void Window::display_callback(GLFWwindow* window)
 	heightmap->draw(shaderProgram);
 
 	//DISABLE PLANE CLIPPING FOR NORMAL RENDERING PASS
-	glDisable(GL_CLIP_DISTANCE0);
 	V = camera.GetViewMatrix();
 	
 	//WATER REFLECTION------------------------------------------------------------------------
@@ -197,7 +192,11 @@ void Window::display_callback(GLFWwindow* window)
 
 	//THIRD PASS ... RENDER SCENE NORMALLY----------------------------------------------------------------------------
 	water->unbindFrameBuffer();
+	glUniform4f(glGetUniformLocation(shaderProgram, "clippingPlane"), 0, 0, 0, 0);
+	glUniform4f(glGetUniformLocation(skyboxShaderProgram, "clippingPlane"), 0, 0, 0, 0);	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glUniform3f(glGetUniformLocation(waterShaderProgram, "camera_Position"), camera.Position.x, camera.Position.y, camera.Position.z);
 	
 	glUseProgram(skyboxShaderProgram);
 	skybox->draw(skyboxShaderProgram);
@@ -222,6 +221,7 @@ void Window::display_callback(GLFWwindow* window)
 	glfwSwapBuffers(window);
 }
 
+bool escape_camera = false;
 void Window::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
 	// Check for a key press
@@ -235,6 +235,12 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		}
 
 	}
+	if (action == GLFW_PRESS && mods == GLFW_MOD_ALT) {
+		escape_camera = !escape_camera;
+	};
+	if (action == GLFW_PRESS && key == GLFW_KEY_R) {
+		heightmap->refresh();
+	};
 	if (key >= 0 && key < 1024)
 	{
 		if (action == GLFW_PRESS) {
@@ -283,7 +289,7 @@ void Window::cursor_position_callback(GLFWwindow* window, double xpos, double yp
 
 	lastPoint.x = xpos;
 	lastPoint.y = ypos;
-
+	if (escape_camera) return;
 	camera.ProcessMouseMovement(xoffset, yoffset);
 }
 
