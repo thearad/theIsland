@@ -24,6 +24,7 @@ public:
 	glm::mat4 toWorld;
 
 	void draw(GLuint);
+	void quickDraw();
 	void update();
 	void spin(float);
 

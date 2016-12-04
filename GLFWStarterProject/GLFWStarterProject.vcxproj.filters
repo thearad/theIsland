@@ -33,6 +33,15 @@
     <ClInclude Include="..\SkyBox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\CSE167Proj1_3\HA21\CSE167StarterCode2\OBJObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ShadowMap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="gBuffers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\main.cpp">
@@ -50,6 +59,15 @@
     <ClCompile Include="..\SkyBox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\CSE167Proj1_3\HA21\CSE167StarterCode2\OBJObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ShadowMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="gBuffers.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -63,6 +81,24 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\skyboxShader.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="depth.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="depth.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shadow.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shadow.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="composite.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="composite.vert">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

@@ -32,6 +32,7 @@ public:
 
 	GLuint loadCubeMap(std::vector<const GLchar*> faces);
 	void draw(GLuint shaderProgram);
+	void quickDraw();
 };
 
 const GLfloat skyboxVertices[] = {

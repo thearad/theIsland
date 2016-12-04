@@ -42,14 +42,14 @@ void setup_opengl_settings()
 	// Enable depth buffering
 	glEnable(GL_DEPTH_TEST);
 	// Related to shaders and z value comparisons for the depth buffer
-	glDepthFunc(GL_LEQUAL);
+	glDepthFunc(GL_LESS);
 	// Set polygon drawing mode to fill front and back of each polygon
 	// You can also use the paramter of GL_LINE instead of GL_FILL to see wireframes
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	// Disable backface culling to render both sides of polygons
 	glDisable(GL_CULL_FACE);
 	// Set clear color
-	glClearColor(0.05f, 0.8f, 0.85f, 1.0f);
+	glClearColor(0.0f, 0.0f, 0.3f, 1.0f);
 }
 
 void print_versions()
