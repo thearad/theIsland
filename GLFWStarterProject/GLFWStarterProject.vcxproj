@@ -19,37 +19,65 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\CSE167Proj1_3\HA21\CSE167StarterCode2\OBJObject.h" />
+    <ClInclude Include="..\Camera.h" />
     <ClInclude Include="..\Cube.h" />
+    <ClInclude Include="..\HeightMap.h" />
     <ClInclude Include="..\main.h" />
+    <ClInclude Include="..\PerlinNoise.h" />
     <ClInclude Include="..\shader.h" />
     <ClInclude Include="..\SkyBox.h" />
+    <ClInclude Include="..\Texture.h" />
+    <ClInclude Include="..\util.h" />
+    <ClInclude Include="..\Water.h" />
     <ClInclude Include="..\Window.h" />
-    <ClInclude Include="gBuffers.h" />
     <ClInclude Include="ShadowMap.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\CSE167Proj1_3\HA21\CSE167StarterCode2\OBJObject.cpp" />
+    <ClCompile Include="..\Camera.cpp" />
     <ClCompile Include="..\Cube.cpp" />
+    <ClCompile Include="..\HeightMap.cpp" />
     <ClCompile Include="..\main.cpp" />
+    <ClCompile Include="..\PerlinNoise.cpp" />
     <ClCompile Include="..\shader.cpp" />
     <ClCompile Include="..\SkyBox.cpp" />
+    <ClCompile Include="..\Texture.cpp" />
+    <ClCompile Include="..\util.cpp" />
+    <ClCompile Include="..\Water.cpp" />
     <ClCompile Include="..\Window.cpp" />
-    <ClCompile Include="gBuffers.cpp" />
     <ClCompile Include="ShadowMap.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\normals.frag" />
+    <None Include="..\normals.gs" />
+    <None Include="..\normals.vert" />
     <None Include="..\shader.frag" />
     <None Include="..\shader.vert" />
     <None Include="..\skyboxShader.frag" />
     <None Include="..\skyboxShader.vert" />
-    <None Include="composite.frag" />
-    <None Include="composite.vert" />
     <None Include="depth.frag" />
     <None Include="depth.vert" />
     <None Include="packages.config" />
-    <None Include="shadow.frag" />
-    <None Include="shadow.vert" />
+    <None Include="pass.frag" />
+    <None Include="pass.vert" />
+    <None Include="shadowMap.frag" />
+    <None Include="shadowMap.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\skybox\back.JPG" />
+    <Image Include="..\skybox\bottom.JPG" />
+    <Image Include="..\skybox\front.jpg" />
+    <Image Include="..\skybox\left.jpg" />
+    <Image Include="..\skybox\right.jpg" />
+    <Image Include="..\skybox\top.jpg" />
+    <Image Include="..\textures\grass.jpg" />
+    <Image Include="..\textures\grass_2.jpg" />
+    <Image Include="..\textures\grass_3.jpg" />
+    <Image Include="..\textures\grass_4.jpg" />
+    <Image Include="..\textures\grass_rock.jpg" />
+    <Image Include="..\textures\rock_2_4w.jpg" />
+    <Image Include="..\textures\sand.jpg" />
+    <Image Include="..\textures\sand_grass_02.jpg" />
+    <Image Include="..\textures\snow.jpg" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{EBF1E546-3F93-49DB-BD9A-B629C3C6DCB0}</ProjectGuid>
@@ -121,7 +149,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>SOIL.lib;glu32.lib;opengl32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -151,7 +179,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

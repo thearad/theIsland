@@ -16,6 +16,11 @@ void setup_callbacks()
 	glfwSetKeyCallback(window, Window::key_callback);
 	// Set the window resize callback
 	glfwSetFramebufferSizeCallback(window, Window::resize_callback);
+
+	glfwSetMouseButtonCallback(window, Window::mouse_callback);
+	glfwSetCursorPosCallback(window, Window::cursor_position_callback);
+	glfwSetScrollCallback(window, Window::scroll_callback);
+
 }
 
 void setup_glew()
@@ -41,15 +46,26 @@ void setup_opengl_settings()
 #endif
 	// Enable depth buffering
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	// Related to shaders and z value comparisons for the depth buffer
-	glDepthFunc(GL_LESS);
+	glDepthFunc(GL_LEQUAL);
 	// Set polygon drawing mode to fill front and back of each polygon
 	// You can also use the paramter of GL_LINE instead of GL_FILL to see wireframes
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	// Disable backface culling to render both sides of polygons
 	glDisable(GL_CULL_FACE);
 	// Set clear color
-	glClearColor(0.0f, 0.0f, 0.3f, 1.0f);
+	glClearColor(0.05f, 0.8f, 0.85f, 1.0f);
+
+	//glEnable(GL_FOG);
+	//GLfloat fogColor[4] = { 0.5, 0.5, 0.5, 1.0 };
+	//glFogi(GL_FOG_MODE, GL_EXP);
+	//glFogfv(GL_FOG_COLOR, fogColor);
+	//glFogf(GL_FOG_DENSITY, 0.35);
+	//glHint(GL_FOG_HINT, GL_DONT_CARE);
+	//glFogf(GL_FOG_START, 1.0);
+	//glFogf(GL_FOG_END, 5.0);
 }
 
 void print_versions()

@@ -62,40 +62,7 @@ void Cube::draw(GLuint shaderProgram)
 	// Now send these values to the shader program
 	glUniformMatrix4fv(uProjection, 1, GL_FALSE, &Window::P[0][0]);
 	glUniformMatrix4fv(uModelview, 1, GL_FALSE, &modelview[0][0]);
-	glm::vec3 lightInvDir = glm::vec3(0.5f, 2, 2);
-
-	// Compute the MVP matrix from the light's point of view
-	glm::mat4 depthProjectionMatrix = glm::ortho<float>(-10, 10, -10, 10, -10, 20);
-	glm::mat4 depthViewMatrix = glm::lookAt(lightInvDir, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-	glm::mat4 depthModelMatrix = glm::mat4(1.0);
-	glm::mat4 depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
-
-	// Send our transformation to the currently bound shader,
-	// in the "MVP" uniform
-	GLuint DepthBiasID = glGetUniformLocation(shaderProgram, "DepthBiasMVP");
-	glm::mat4 biasMatrix(
-		0.5, 0.0, 0.0, 0.0,
-		0.0, 0.5, 0.0, 0.0,
-		0.0, 0.0, 0.5, 0.0,
-		0.5, 0.5, 0.5, 1.0
-	);
-
-	glm::mat4 depthBiasMVP = biasMatrix*depthMVP;
-	glUniformMatrix4fv(DepthBiasID, 1, GL_FALSE, &depthBiasMVP[0][0]);
-
-	GLuint ShadowMapID = glGetUniformLocation(shaderProgram, "shadowMap");
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, Window::depthTexture);
-	glUniform1i(ShadowMapID, 1);
 	// Now draw the cube. We simply need to bind the VAO associated with it.
-	glBindVertexArray(VAO);
-	// Tell OpenGL to draw with triangles, using 36 indices, the type of the indices, and the offset to start from
-	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-	// Unbind the VAO when we're done so we don't accidentally draw extra stuff or tamper with its bound buffers
-	glBindVertexArray(0);
-}
-
-void Cube::quickDraw() {
 	glBindVertexArray(VAO);
 	// Tell OpenGL to draw with triangles, using 36 indices, the type of the indices, and the offset to start from
 	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);

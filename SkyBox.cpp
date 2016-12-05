@@ -73,12 +73,3 @@ void SkyBox::draw(GLuint shaderProgram) {
 	glBindVertexArray(0);
 	glDepthMask(GL_TRUE);
 }
-
-void SkyBox::quickDraw() {
-	glBindVertexArray(skyboxVAO);
-
-	glDrawArrays(GL_TRIANGLES, 0, 36);
-	glBindVertexArray(0);
-	glDepthMask(GL_TRUE);
-
-}

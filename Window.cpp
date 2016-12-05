@@ -1,107 +1,94 @@
 #include "window.h"
 
-const char* window_title = "GLFW Starter Project";
+const char* window_title = "Island";
 Cube * cube;
-OBJObject * bunny;
 SkyBox * skybox;
-gBuffers * gBuffer;
+HeightMap* heightmap;
+Water* water;
+ShadowMap * dLightShadow;
+glm::mat4 depthMVP;
 
-GLuint shaderProgram;
+GLuint heightmapShaderProgram;
 GLuint skyboxShaderProgram;
+GLuint normalsShaderProgram;
+GLuint waterShaderProgram;
 GLuint depthShaderProgram;
-GLuint shadowShaderProgram;
-GLuint compShaderProgram;
+GLuint shadowmapShaderProgram;
+GLuint quad_programID;
+GLuint quad_vertexbuffer;
+GLuint texID;
 
 // On some systems you need to change this to the absolute path
-#define VERTEX_SHADER_PATH "../shader.vert"
-#define FRAGMENT_SHADER_PATH "../shader.frag"
-
-#define DEPTH_VERTEX_SHADER_PATH "depth.vert"
-#define DEPTH_FRAGMENT_SHADER_PATH "depth.frag"
-
-#define SHADOW_VERTEX_SHADER_PATH "shadow.vert"
-#define SHADOW_FRAGMENT_SHADER_PATH "shadow.frag"
-
-#define COMP_VERTEX_SHADER_PATH "composite.vert"
-#define COMP_FRAGMENT_SHADER_PATH "composite.frag"
-
-#define SKY_VERTEX_SHADER_PATH "../skyboxShader.vert"
-#define SKY_FRAGMENT_SHADER_PATH "../skyboxShader.frag"
+#define SHADER_PATH "../shaders/"
 #define SKYBOX_FACE_DIR "../skybox/"
-//std::string SKYBOX_DIR = "../skybox/";
 
-
-// Default camera parameters
-glm::vec3 cam_pos(0.0f, 0.0f, 20.0f);		// e  | Position of camera
-glm::vec3 cam_look_at(0.0f, 0.0f, 0.0f);	// d  | This is where the camera looks at
-glm::vec3 cam_up(0.0f, 1.0f, 0.0f);			// up | What orientation "up" is
+glm::vec3 lightInvDir;
+Camera camera(glm::vec3(0.0f, 5.0f, 50.0f));
+bool keys[1024];
+GLfloat deltaTime = 0.0f, lastFrame = 0.0f;
 
 int Window::width;
 int Window::height;
-GLuint Window::FramebufferName;
-GLuint Window::depthTexture;
-Window::CameraDirection Window::directions[6];
-ShadowMap * dLightShadow;
-glm::mat4 Window::depthViewMatrix, Window::depthProjectionMatrix;
-glm::vec3 Window::lightInvDir = glm::vec3(2, 0, 2);
-//glm::vec4 lightDir = glm::vec4(1, 1, 1, 0);
+
 glm::mat4 Window::P;
 glm::mat4 Window::V;
 
-struct BaseLight
-{
-	glm::vec3 Color;
-	float AmbientIntensity;
-	float DiffuseIntensity;
-};
-
-struct DirectionalLight
-{
-	BaseLight Base;
-	glm::vec3 Direction;
-};
+bool Window::lbutton_down;
+bool Window::first_time;
+glm::vec3 Window::lastPoint;
 
 void Window::initialize_objects()
 {
-	//cube = new Cube();
-	dLightShadow = new ShadowMap(Window::width, Window::height);
-	gBuffer = new gBuffers(Window::width, Window::height);
-	//dLightShadow = ShadowMap(2048,2048);
-	bunny = new OBJObject("bunny.obj", glm::vec4(0.6, 1, 1, 1.0), 0.5f, glm::vec3(0.9, 0.7, 0.1));
-	std::vector<const GLchar*> faces;
-	faces.push_back(SKYBOX_FACE_DIR "right.jpg");
-	faces.push_back(SKYBOX_FACE_DIR "left.jpg");
-	faces.push_back(SKYBOX_FACE_DIR "top.jpg");
-	faces.push_back(SKYBOX_FACE_DIR "bottom.jpg");
-	faces.push_back(SKYBOX_FACE_DIR "back.jpg");
-	faces.push_back(SKYBOX_FACE_DIR "front.jpg");
+	glm::mat4 depthViewMatrix, depthProjectionMatrix;
+	depthProjectionMatrix = glm::ortho<float>(-10, 10, -10, 10, -10, 20);
+	lightInvDir = glm::vec3(1, 1, 1);
+	depthViewMatrix = glm::lookAt(glm::vec3(0,0,0), lightInvDir, glm::vec3(0, 1, 0));
+	depthMVP = depthProjectionMatrix * depthViewMatrix;
+
+	// Load the shader program. Make sure you have the correct filepath up top
+	heightmapShaderProgram = LoadShaders(SHADER_PATH "heightmap.vert", SHADER_PATH "heightmap.frag");
+	skyboxShaderProgram = LoadShaders(SHADER_PATH "skybox.vert", SHADER_PATH "skybox.frag");
+	normalsShaderProgram = LoadShaders(SHADER_PATH "normals.vert", SHADER_PATH "normals.frag", SHADER_PATH "normals.gs");
+	waterShaderProgram = LoadShaders(SHADER_PATH "water.vert", SHADER_PATH "water.frag");
+	depthShaderProgram = LoadShaders("depth.vert", "depth.frag");
+	shadowmapShaderProgram = LoadShaders("shadowMap.vert", "shadowMap.frag");
+	//Render objects
+	cube = new Cube();
+	water = new Water(200, 200);
+	dLightShadow = new ShadowMap(640,480);
+
+	std::vector<const GLchar*> faces = {
+		SKYBOX_FACE_DIR "right.jpg", SKYBOX_FACE_DIR "left.jpg", SKYBOX_FACE_DIR "top.jpg",
+		SKYBOX_FACE_DIR "bottom.jpg", SKYBOX_FACE_DIR "back.jpg", SKYBOX_FACE_DIR "front.jpg"
+	};
 	skybox = new SkyBox(faces);
 
-	depthProjectionMatrix = glm::ortho<float>(-100, 100, -100, 100, -10, 100);//maybebe wrong....fov should be 90 for cubemaps? But ortho?
-	//glm::perspective(45.0f, (float)width / (float)height, 0.1f, 1000.0f);
-	directions[0] = { GL_TEXTURE_CUBE_MAP_POSITIVE_X, glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f) };
-	directions[1] = { GL_TEXTURE_CUBE_MAP_NEGATIVE_X, glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f) };
-	directions[2] = { GL_TEXTURE_CUBE_MAP_POSITIVE_Y, glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f) };
-	directions[3] = { GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f) };
-	directions[4] = { GL_TEXTURE_CUBE_MAP_POSITIVE_Z, glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f) };
-	directions[5] = { GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f) };
+	heightmap = new HeightMap(200, 200);
 
-	depthShaderProgram = LoadShaders(DEPTH_VERTEX_SHADER_PATH, DEPTH_FRAGMENT_SHADER_PATH);
+	static const GLfloat g_quad_vertex_buffer_data[] = {
+		-1.0f, -1.0f, 0.0f,
+		1.0f, -1.0f, 0.0f,
+		-1.0f,  1.0f, 0.0f,
+		-1.0f,  1.0f, 0.0f,
+		1.0f, -1.0f, 0.0f,
+		1.0f,  1.0f, 0.0f,
+	};
 
-	shaderProgram = LoadShaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
-	shadowShaderProgram = LoadShaders(SHADOW_VERTEX_SHADER_PATH, SHADOW_FRAGMENT_SHADER_PATH);
-	compShaderProgram = LoadShaders(COMP_VERTEX_SHADER_PATH, COMP_FRAGMENT_SHADER_PATH);
-	skyboxShaderProgram = LoadShaders(SKY_VERTEX_SHADER_PATH, SKY_FRAGMENT_SHADER_PATH);
+	glGenBuffers(1, &quad_vertexbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data, GL_STATIC_DRAW);
+
+	// Create and compile our GLSL program from the shaders
+	quad_programID = LoadShaders("pass.vert", "pass.frag");
+	texID = glGetUniformLocation(quad_programID, "texture");
+
 }
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
 void Window::clean_up()
 {
 	delete(cube);
-	glDeleteProgram(shaderProgram);
-	glDeleteProgram(skyboxShaderProgram);
-	glDeleteProgram(shadowShaderProgram);
-	glDeleteProgram(depthShaderProgram);
+	glDeleteProgram(heightmapShaderProgram);
 }
 
 GLFWwindow* Window::create_window(int width, int height)
@@ -160,8 +147,8 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 
 	if (height > 0)
 	{
-		P = glm::perspective(45.0f, (float)width / (float)height, 0.1f, 1000.0f);
-		V = glm::lookAt(cam_pos, cam_look_at, cam_up);
+		V = camera.GetViewMatrix();
+		P = glm::perspective(camera.Zoom, (float)width / (float)height, 0.1f, 1000.0f);
 	}
 }
 
@@ -171,137 +158,233 @@ void Window::idle_callback()
 	//cube->update();
 }
 
+//renders objects on the scene that require no multirendering
+void Window::render_scene() {
+	glUseProgram(skyboxShaderProgram);
+	skybox->draw(skyboxShaderProgram);
+
+	glUseProgram(heightmapShaderProgram);
+	heightmap->draw(heightmapShaderProgram);
+}
+
+//polls for WASD movements
+void Window::poll_movement() {
+	GLfloat currentFrame = glfwGetTime();
+	deltaTime = currentFrame - lastFrame;
+	lastFrame = currentFrame;
+	Do_Movement();
+}
+
+glm::vec4 refract_clip = glm::vec4(0.f, -1.f, 0.f, 0.01f);
+glm::vec4 reflect_clip = glm::vec4(0.f, 1.f, 0.f, -0.01f);
 void Window::display_callback(GLFWwindow* window)
 {
-	
-	// Clear the color and depth buffers
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	//glUseProgram(shadowShaderProgram);
-	//gBuffer->bindDraw();
-	//gBuffer->setDrawBuffers();
-	//bunny->draw(shadowShaderProgram);
-	
-	//gBuffer->bindDraw();
-	//gBuffer->setDrawLight();
-	//glClear(GL_COLOR_BUFFER_BIT);
-	//gBuffer->unbindDraw();
-
 	shadowPass();
-	//compositePass();
-	//skyboxPass();
-	//glUseProgram(skyboxShaderProgram);//SKYBOX OR DEPTH
-	//skybox->draw(skyboxShaderProgram);
-	//glUseProgram(shaderProgram);
-	//bunny->draw(shaderProgram);
-	
-	
-	//glUseProgram(0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	/*FOR TESTING SHADOW MAP*/
+	/*glDisable(GL_COMPARE_R_TO_TEXTURE);
+	glUseProgram(quad_programID);
 
+	// Bind our texture in Texture Unit 0
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, dLightShadow->depth);
+	// Set our "renderedTexture" sampler to user Texture Unit 0
+	glUniform1i(texID, 0);
+
+	// 1rst attribute buffer : vertices
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
+	glVertexAttribPointer(
+		0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+		3,                  // size
+		GL_FLOAT,           // type
+		GL_FALSE,           // normalized?
+		0,                  // stride
+		(void*)0            // array buffer offset
+	);
+
+	// Draw the triangle !
+	// You have to disable GL_COMPARE_R_TO_TEXTURE above in order to see anything !
+	glDrawArrays(GL_TRIANGLES, 0, 6); // 2*3 indices starting at 0 -> 2 triangles
+	glDisableVertexAttribArray(0);*/
+
+	glm::mat4 biasMatrix(
+		0.5, 0.0, 0.0, 0.0,
+		0.0, 0.5, 0.0, 0.0,
+		0.0, 0.0, 0.5, 0.0,
+		0.5, 0.5, 0.5, 1.0
+	);
+
+	glm::mat4 depthBiasMVP = biasMatrix*depthMVP;
+	
+	//ENABLE PLANE CLIPPING FOR WATER REFLECTION/REFRACTION
+	glEnable(GL_CLIP_DISTANCE0);
+
+	//FIRST PASS: SAVE TO WATER REFRACTION FBO-----------------------------------------------------------------
+	water->bindFrameBuffer(Water::REFRACTION);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glUniform4f(glGetUniformLocation(heightmapShaderProgram, "clippingPlane"), refract_clip.x, refract_clip.y, refract_clip.z, refract_clip.w);
+	glUniform4f(glGetUniformLocation(skyboxShaderProgram, "clippingPlane"), refract_clip.x, refract_clip.y, refract_clip.z, refract_clip.w);
+
+	render_scene();
+	
+	//SECOND PASS: SAVE TO WATER REFLECTION FBO------------------------------------------------------------------
+	water->bindFrameBuffer(Water::REFLECTION);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glUniform4f(glGetUniformLocation(heightmapShaderProgram, "clippingPlane"), reflect_clip.x, reflect_clip.y, reflect_clip.z, reflect_clip.w);
+	glUniform4f(glGetUniformLocation(skyboxShaderProgram, "clippingPlane"), reflect_clip.x, reflect_clip.y, reflect_clip.z, reflect_clip.w);
+
+	float dist = 2 * camera.Position.y - 0.01f;
+	camera.Position.y -= dist;
+	camera.Pitch *= -1;
+	camera.updateCameraVectors();
+	V = camera.GetViewMatrix();
+
+	render_scene();
+
+	camera.Position.y += dist;
+	camera.Pitch *= -1;
+	camera.updateCameraVectors();
+	V = camera.GetViewMatrix();
+
+	//THIRD PASS: RENDER SCENE NORMALLY ----------------------------------------------------------------------------
+	water->unbindFrameBuffer();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glActiveTexture(GL_TEXTURE9); //switches texture bind location to GL_TEXTURE(0+i)
+	glBindTexture(GL_TEXTURE_2D, dLightShadow->depth); //bind texture to active location
+	glUniform1i(glGetUniformLocation(shadowmapShaderProgram, "shadowMap"), 9); //sets uniform sampler2D texSampleri's texture bind loc.
+
+	glUniformMatrix4fv(glGetUniformLocation(shadowmapShaderProgram, "depthBiasMVP"), 1, GL_FALSE, &depthBiasMVP[0][0]);
+	glUniform3fv(glGetUniformLocation(shadowmapShaderProgram, "lightInvDir"),1, &lightInvDir[0]);
+	glUniform4f(glGetUniformLocation(shadowmapShaderProgram, "clippingPlane"), 0, 0, 0, 0);
+	glUniform4f(glGetUniformLocation(heightmapShaderProgram, "clippingPlane"), 0, 0, 0, 0);
+	glUniform4f(glGetUniformLocation(skyboxShaderProgram, "clippingPlane"), 0, 0, 0, 0);
+	glUniform3f(glGetUniformLocation(waterShaderProgram, "camera_Position"), camera.Position.x, camera.Position.y, camera.Position.z);
+
+
+	glUseProgram(skyboxShaderProgram);
+	skybox->draw(skyboxShaderProgram);
+
+	glUseProgram(shadowmapShaderProgram);
+	heightmap->draw(shadowmapShaderProgram);
+	//render_scene();
+	
+	glUseProgram(waterShaderProgram);
+	water->draw(waterShaderProgram);
+	
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
+	poll_movement();
+
+	//update camera and perspective with polled movements
+	V = camera.GetViewMatrix();
+	P = glm::perspective(camera.Zoom, (float)width / (float)height, 0.1f, 1000.0f);
+
 	// Swap buffers
 	glfwSwapBuffers(window);
 }
 
+bool escape_camera = false;
+void Window::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+
+	if (action == GLFW_PRESS)
+	{
+		switch (key) {
+		case GLFW_KEY_W:
+		case GLFW_KEY_A:
+		case GLFW_KEY_S:
+		case GLFW_KEY_D:
+			keys[key] = true;
+			break;
+		case GLFW_KEY_ESCAPE:
+			glfwSetWindowShouldClose(window, GL_TRUE);
+			break;
+		case GLFW_KEY_R:
+			heightmap->refresh(200, 200, 20.f);
+			break;
+		}
+
+		if (mods == GLFW_MOD_ALT) {
+			escape_camera = !escape_camera;
+		};
+
+	}
+	else if (action == GLFW_RELEASE) {
+		switch (key) {
+		case GLFW_KEY_W:
+		case GLFW_KEY_A:
+		case GLFW_KEY_S:
+		case GLFW_KEY_D:
+			keys[key] = false;
+			break;
+		}
+	}
+}
+void Window::mouse_callback(GLFWwindow* window, int button, int action, int mods)
+{
+	if (button == GLFW_MOUSE_BUTTON_LEFT) {
+		if (GLFW_PRESS == action) {
+			lbutton_down = true;
+		}
+		else if (GLFW_RELEASE == action) {
+			lbutton_down = false;
+			first_time = true;
+		}
+	}
+}
+
+void Window::Do_Movement()
+{
+	// Camera controls
+	if (keys[GLFW_KEY_W])
+		camera.ProcessKeyboard(FORWARD, deltaTime);
+	if (keys[GLFW_KEY_S])
+		camera.ProcessKeyboard(BACKWARD, deltaTime);
+	if (keys[GLFW_KEY_A])
+		camera.ProcessKeyboard(LEFT, deltaTime);
+	if (keys[GLFW_KEY_D])
+		camera.ProcessKeyboard(RIGHT, deltaTime);
+}
+void Window::cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
+{
+	if (first_time)
+	{
+		lastPoint.x = xpos;
+		lastPoint.y = ypos;
+		first_time = false;
+	}
+
+	GLfloat xoffset = xpos - lastPoint.x;
+	GLfloat yoffset = lastPoint.y - ypos;  // Reversed since y-coordinates go from bottom to left
+
+	lastPoint.x = xpos;
+	lastPoint.y = ypos;
+	if (escape_camera) return;
+	camera.ProcessMouseMovement(xoffset, yoffset);
+}
+
+void Window::scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+	camera.ProcessMouseScroll(yoffset/10.f);
+}
+
 void Window::shadowPass() {
-	//glViewport(0, 0, 2048, 2048);
+	
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+	
 	dLightShadow->bind();
 	glUseProgram(depthShaderProgram);
-	/*glClearColor(FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX);
-	glDepthMask(GL_TRUE);
-	glEnable(GL_DEPTH_TEST);
-	for (int i = 0; i < 6; i++) {*/
-		
-	depthViewMatrix = glm::lookAt(lightInvDir, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-	glm::mat4 depthMVP = depthProjectionMatrix * depthViewMatrix;
+	
 	GLuint depthMatrixID = glGetUniformLocation(depthShaderProgram, "depthMVP");
 	glUniformMatrix4fv(depthMatrixID, 1, GL_FALSE, &depthMVP[0][0]);
-	skybox->quickDraw();
-	bunny->quickDraw();
 	
+	//skybox->draw(depthShaderProgram);
+	heightmap->quickDraw();
+
 	dLightShadow->unbind();
 	glDisable(GL_CULL_FACE);
-	//glDepthMask(GL_FALSE);
-
-	
-}
-
-void Window::compositePass() {
-	glCullFace(GL_BACK);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	glUseProgram(compShaderProgram);
-	
-	dLightShadow->bindRead(GL_TEXTURE1);
-
-	GLuint invVID = glGetUniformLocation(compShaderProgram, "gEyeWorldPos");
-	glUniform3fv(invVID, 1, &cam_pos[0]);
-	
-	glUniform1f(glGetUniformLocation(compShaderProgram, "gMatSpecularIntensity"), 0.3f);
-	glUniform1f(glGetUniformLocation(compShaderProgram, "gSpecularPower"), 1.0f); 
-
-
-	//glActiveTexture(GL_TEXTURE0);
-	//glBindTexture(GL_TEXTURE_2D, gBuffer->position);
-	//glActiveTexture(GL_TEXTURE1);
-	//glBindTexture(GL_TEXTURE_2D, gBuffer->normal);
-	//glActiveTexture(GL_TEXTURE2);
-	//glBindTexture(GL_TEXTURE_2D, gBuffer->color);
-	//glActiveTexture(GL_TEXTURE5);
-	//glBindTexture(GL_TEXTURE_2D, dLightShadow->depth);
-	
-	//glUniform1i(glGetUniformLocation(compShaderProgram, "positionMap"), 0);
-	//glUniform1i(glGetUniformLocation(compShaderProgram, "normalMap"), 1);
-	//glUniform1i(glGetUniformLocation(compShaderProgram, "colorMap"), 2);
-	//glUniform1i(glGetUniformLocation(compShaderProgram, "shadowMap"), 5);
-
-	//glUniform3fv(glGetUniformLocation(compShaderProgram,"l"),1, &glm::vec3(Window::V * glm::vec4(lightInvDir,0))[0]);
-	depthViewMatrix = glm::lookAt(lightInvDir, glm::vec3(0,0,0), glm::vec3(0,1,0));
-	glm::mat4 depthMVP = depthProjectionMatrix * depthViewMatrix;
-	GLuint depthMatrixID = glGetUniformLocation(compShaderProgram, "gLightWVP");
-	glUniformMatrix4fv(depthMatrixID, 1, GL_FALSE, &depthMVP[0][0]);
-	
-	//glUniform1i(glGetUniformLocation(compShaderProgram, "shadowMapWidth"), 2048);
-	//glUniform1i(glGetUniformLocation(compShaderProgram, "shadowMapHeight"), 2048);
-	//glUniform1i(glGetUniformLocation(compShaderProgram, "type"), 7);//0 - 7
-	//finalPass.setUniformi("type", type);
-	//glEnable(GL_FRAMEBUFFER_SRGB);
-
-	glClear(GL_COLOR_BUFFER_BIT);
-
-	bunny->draw(compShaderProgram);
-
-}
-
-void Window::skyboxPass() {
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer->getFBO());
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-	glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-
-	glUseProgram(skyboxShaderProgram);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
-	skybox->draw(skyboxShaderProgram);
-	glDisable(GL_DEPTH_TEST);
-}
-
-void Window::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
-	// Check for a key press
-	if (action == GLFW_PRESS)
-	{
-		// Check if escape was pressed
-		if (key == GLFW_KEY_ESCAPE)
-		{
-			// Close the window. This causes the program to also terminate.
-			glfwSetWindowShouldClose(window, GL_TRUE);
-		}
-	}
 }
