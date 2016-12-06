@@ -1,0 +1,29 @@
+﻿  Camera.cpp
+  Cube.cpp
+c:\users\anara\desktop\cse167\Texture.h(8): fatal error C1083: Cannot open include file: 'SOIL.h': No such file or directory
+  HeightMap.cpp
+c:\users\anara\desktop\cse167\Texture.h(8): fatal error C1083: Cannot open include file: 'SOIL.h': No such file or directory
+  main.cpp
+c:\users\anara\desktop\cse167\Texture.h(8): fatal error C1083: Cannot open include file: 'SOIL.h': No such file or directory
+  PerlinNoise.cpp
+  shader.cpp
+  SkyBox.cpp
+c:\users\anara\desktop\cse167\Texture.h(8): fatal error C1083: Cannot open include file: 'SOIL.h': No such file or directory
+  Texture.cpp
+c:\users\anara\desktop\cse167\Texture.h(8): fatal error C1083: Cannot open include file: 'SOIL.h': No such file or directory
+  util.cpp
+..\util.cpp(11): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+..\util.cpp(12): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+..\util.cpp(16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+..\util.cpp(32): error C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt\stdio.h(205): note: see declaration of 'fopen'
+..\util.cpp(61): error C4996: 'fscanf': This function or variable may be unsafe. Consider using fscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt\stdio.h(1193): note: see declaration of 'fscanf'
+..\util.cpp(68): error C4996: 'fscanf': This function or variable may be unsafe. Consider using fscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt\stdio.h(1193): note: see declaration of 'fscanf'
+  Water.cpp
+c:\users\anara\desktop\cse167\Texture.h(8): fatal error C1083: Cannot open include file: 'SOIL.h': No such file or directory
+  Window.cpp
+c:\users\anara\desktop\cse167\Texture.h(8): fatal error C1083: Cannot open include file: 'SOIL.h': No such file or directory
+  ShadowMap.cpp
+c:\users\anara\desktop\cse167\Texture.h(8): fatal error C1083: Cannot open include file: 'SOIL.h': No such file or directory

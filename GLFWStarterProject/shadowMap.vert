@@ -4,11 +4,12 @@ layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
 layout (location = 2) in vec2 texCoord;
 
+uniform vec3 lightInvDir;
+uniform mat4 staticview;
 uniform mat4 projection;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 depthBiasMVP;
-uniform vec3 lightInvDir;
 uniform vec4 clippingPlane;
 
 out vec3 Normal;
@@ -40,10 +41,10 @@ void main()
     
 	shadowCoord = depthBiasMVP * vec4(position,1.0);
     
-	lightDir = (view * vec4(lightInvDir, 0)).xyz;
+	lightDir = (staticview * vec4(lightInvDir, 0.0)).xyz;//lightInvDir is freaking out
 
-	eyeDir = vec3(0,0,0) - (view * model * vec4(position, 1.0)).xyz;
-	normal_cam = (view * model * vec4(normal, 0.0)).xyz; ///took out view
+	eyeDir = vec3(0,0,0) - (staticview * model * vec4(position, 1.0)).xyz;
+	normal_cam = (staticview * model * vec4(normal, 0.0)).xyz; ///took out view
 
 	float distance = length(camSpace.xyz);
     Visibility = exp(-pow(distance*density, gradient));

@@ -51,8 +51,8 @@ void main()
 	float visibility = 1.0f;
     
 	vec3 n = normalize(normal_cam);
-	//vec3 l = normalize(lightDir);
-	vec3 l = vec3(1,1,1);
+	vec3 l = normalize(lightDir);
+	//vec3 l = vec3(1,1,1);
 	float cosTheta = clamp( dot( n,l ), 0,1 );
 	vec3 e = normalize(eyeDir);
 	vec3 r = reflect(-l, n);
@@ -114,7 +114,7 @@ void main()
         color = vec4(texColor.xyz, 1.0f);
     }//(Visibility+visibility) * 
 	//* cosTheta
-    color = vec4((ambient + (visibility)*texColor.xyz* lightColor* lightPower* cosTheta), 1.0f); //+  ((Visibility+visibility)/2)*specular* lightColor* lightPower* pow(cosAlpha, 5)), 1.0f);
+    color = vec4((ambient + ((Visibility+visibility)/2)*texColor.xyz* lightColor* lightPower* cosTheta), 1.0f); //+  ((Visibility+visibility)/2)*specular* lightColor* lightPower* pow(cosAlpha, 5)), 1.0f);
 	//color = mix(vec4(0.4, 0.4, 0.4, 0.0), color, Visibility);
 	//mix(vec4(0.4, 0.4, 0.4, 0.0), color, Visibility);
 }

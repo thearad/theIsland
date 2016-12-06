@@ -16,6 +16,7 @@
 #include "HeightMap.h"
 #include "Water.h"
 #include "Camera.h"
+#include "GLFWStarterProject\Sphere.h"
 #include "GLFWStarterProject\ShadowMap.h"
 
 class Window

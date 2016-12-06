@@ -31,6 +31,7 @@
     <ClInclude Include="..\Water.h" />
     <ClInclude Include="..\Window.h" />
     <ClInclude Include="ShadowMap.h" />
+    <ClInclude Include="Sphere.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Camera.cpp" />
@@ -45,6 +46,7 @@
     <ClCompile Include="..\Water.cpp" />
     <ClCompile Include="..\Window.cpp" />
     <ClCompile Include="ShadowMap.cpp" />
+    <ClCompile Include="Sphere.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\normals.frag" />
