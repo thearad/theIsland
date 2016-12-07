@@ -9,11 +9,6 @@
 
 using namespace util;
 
-struct ParticleTexture {
-	GLuint texId;
-	GLuint numRows;
-};
-
 class Particle{
 private:
 

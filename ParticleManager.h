@@ -16,6 +16,11 @@
 
 using namespace util;
 
+struct ParticleTexture {
+	GLuint texId;
+	GLuint numRows;
+};
+
 class ParticleManager {
 private:
 	const float VERTICES[12] = {

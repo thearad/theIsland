@@ -3,6 +3,15 @@
 ParticleManager::ParticleManager(GLuint shaderProgram) {
 	this->shaderProgram = shaderProgram;
 	init();
+
+	std::vector<std::pair<GLenum, GLint>> texParams = {
+		std::make_pair(GL_TEXTURE_MIN_FILTER, GL_LINEAR),
+		std::make_pair(GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+	};
+
+	texture.texId = Texture("../particles/star.png", GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, SOIL_LOAD_RGBA, texParams).getID();
+	texture.numRows = 1;
+
 }
 
 ParticleManager::~ParticleManager() {
@@ -86,6 +95,8 @@ void ParticleManager::render(Camera camera) {
 
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &Window::P[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &viewMat[0][0]);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture.texId);
 
 	for (int i = 0; i < particles.size(); i++) {
 		std::cout << "Drawing particles[" << i << "]" << std::endl;
@@ -134,33 +145,3 @@ void ParticleManager::addParticles(int x, int z) {
 	std::cout << "particles size:" << particles.size() << std::endl;
 
 }
-
-//in Particle:
-//private ParticleTexture tex;
-//
-////in ParticleManager:
-//private ParticleTexture tex;
-////use it when you create a new particle...
-//map<ParticleTexture, List<Particle>> particles;
-////inaddParticle: 3:46
-//list particles.get(particle.texture);
-//if list null then:
-//particles.put(particle.texture, particle)
-////update:3:58
-//auto it = particles.begin(); it != particles.end()
-//	update() on it.value;
-//
-////render to render(map, camera)
-//for texture in map.keys:
-//	glActiveTexture(GL_TEXTURE0);
-//	glBindTexture(GL_TEXTURE_2D, texture.id);
-//	for particle_using_texture in map.values list:
-////in vert
-//	textureCoords.x = position.x + vec2(0.5, 0.5);
-//	textureCoords.y = 1.0 - position.y
-////in frag
-//	in vec2 textureCoords;
-//	uniform sampler2D particleTex;
-//
-//	color = texture(particletexture, texturecoords);
-//
