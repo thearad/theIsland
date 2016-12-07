@@ -5,7 +5,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include "glm/gtx/string_cast.hpp"
 #include <vector>
-#include <map>
+#include <unordered_map>
 
 #include "Window.h"
 #include "Camera.h"
@@ -13,8 +13,13 @@
 #include "Particle.h"
 
 #define MAX_PARTICLES 1500
-
 using namespace util;
+
+struct ParticleHash {
+	size_t operator()(const ParticleTexture& t) const {
+		return t.texId;
+	}
+};
 
 class ParticleManager {
 private:
@@ -27,9 +32,9 @@ private:
 
 	GLuint VAO, VBO_vert;
 	GLuint shaderProgram;
-	std::vector<Particle> particles;
+	std::vector<Particle*> particles;
 	
-	std::map<ParticleTexture, std::vector<Particle>*> particles_map;
+	std::unordered_map<ParticleTexture, std::vector<Particle*>*, ParticleHash> particles_map;
 	ParticleTexture texture;
 
 public:

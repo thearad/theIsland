@@ -74,36 +74,503 @@ Linking program
 ../textures/grass_3.jpg
 ../textures/grass_rock.jpg
 ../textures/snow.jpg
+../particles/star.png
+enter render
 Updating particle vector
+enter render
 Updating particle vector
+enter render
 Updating particle vector
+enter render
 Updating particle vector
+enter render
 Updating particle vector
+enter render
 Updating particle vector
+enter render
 Updating particle vector
+enter render
 Updating particle vector
+enter render
 Updating particle vector
+enter render
 Updating particle vector
+enter render
 Updating particle vector
+enter render
 Updating particle vector
+enter render
 Updating particle vector
+enter render
 Updating particle vector
+enter render
 Updating particle vector
+enter render
 Updating particle vector
+enter render
 Updating particle vector
+enter render
 Updating particle vector
+enter render
 Updating particle vector
+enter render
 Updating particle vector
+enter render
 Updating particle vector
+enter render
 Updating particle vector
+enter render
 Updating particle vector
+enter render
 Updating particle vector
+enter render
 Updating particle vector
+enter render
 Updating particle vector
+enter render
 Updating particle vector
+enter render
 Updating particle vector
+enter render
 Updating particle vector
+enter render
 Updating particle vector
+enter render
 Updating particle vector
+enter render
 Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+enter render
+Updating particle vector
+Adding a particle x: 73 z: 148
+particles size:0
+l was null
+enter render
 Updating particle vector

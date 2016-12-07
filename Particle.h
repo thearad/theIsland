@@ -9,9 +9,20 @@
 
 using namespace util;
 
-struct ParticleTexture {
+class ParticleTexture {
+public:
 	GLuint texId;
 	GLuint numRows;
+	ParticleTexture() {};
+	ParticleTexture(GLuint texId, GLuint numRows) { 
+		this->texId = texId; 
+		this->numRows = numRows;
+	};
+
+	bool operator==(ParticleTexture const & o) const
+	{
+		return texId == texId;
+	}
 };
 
 class Particle{
@@ -35,5 +46,4 @@ public:
 	Particle(glm::vec3 position, glm::vec3 velocity, float gravity_effect,
 		float life_length, float rotation, float scale, ParticleTexture texture);
 	bool update();
-
 };

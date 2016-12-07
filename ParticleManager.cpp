@@ -2,6 +2,14 @@
 
 ParticleManager::ParticleManager(GLuint shaderProgram) {
 	this->shaderProgram = shaderProgram;
+
+	std::vector<std::pair<GLenum, GLint>> texParams = {
+		std::make_pair(GL_TEXTURE_MIN_FILTER, GL_LINEAR),
+		std::make_pair(GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+	};
+
+	texture = ParticleTexture(Texture("../particles/star.png", GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, texParams).getID(), 1);
+
 	init();
 }
 
@@ -78,6 +86,7 @@ void ParticleManager::loadParticleModel(glm::vec3 pos, float rotation, float sca
 }
 
 void ParticleManager::render(Camera camera) {
+	std::cout << "enter render" << std::endl;
 	update();
 
 	pre_render();
@@ -87,10 +96,33 @@ void ParticleManager::render(Camera camera) {
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &Window::P[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &viewMat[0][0]);
 
-	for (int i = 0; i < particles.size(); i++) {
-		std::cout << "Drawing particles[" << i << "]" << std::endl;
-		loadParticleModel(particles[i].position, particles[i].rotation, particles[i].scale, viewMat);
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, 12);
+	//for (int i = 0; i < particles.size(); i++) {
+	//	std::cout << "Drawing particles[" << i << "]" << std::endl;
+	//	loadParticleModel(particles[i].position, particles[i].rotation, particles[i].scale, viewMat);
+	//	glDrawArrays(GL_TRIANGLE_STRIP, 0, 12);
+	//}
+	for (auto map_it = particles_map.begin(); map_it != particles_map.end(); map_it++) {
+		std::vector<Particle*>* l = map_it->second;
+		ParticleTexture tex = map_it->first;
+
+		std::cout << "map[" << map_it->first.texId << "]=";
+		//Grab ParticleList for each ParticleTexture
+		for (int i = 0; i < l->size(); i++) {
+			Particle* part = l->at(i);
+			std::cout << glm::to_string(part->position) << ", ";
+		}
+		std::cout << std::endl;
+
+		//bind texture
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, tex.texId);
+		for (auto vec_it = l->begin(); vec_it != l->end(); vec_it++) {
+			std::cout << "Drawing particles[_]" << std::endl;
+			Particle* part = *vec_it;
+			loadParticleModel(part->position, part->rotation, part->scale, viewMat);
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 12);
+		}
+		//6:30 shader work.
 	}
 
 	post_render();
@@ -98,16 +130,44 @@ void ParticleManager::render(Camera camera) {
 
 void ParticleManager::update() {
 	std::cout << "Updating particle vector" << std::endl;
-	auto it = particles.begin();
 
-	while (it != particles.end()) {
-		if (it->update()) {
-			it++;
-		}
-		else {
-			it = particles.erase(it);
+	//Iterate through map of ParticleTexture, ParticleList
+	auto map_it = particles_map.begin();
+	while (map_it != particles_map.end()) {
+		std::vector<Particle*>* l = map_it->second;
+
+		//Iterate through ParticleList
+		auto vec_it = l->begin();
+		while (vec_it != l->end()) {
+			//If Particle in ParticleList is updated, go to next item
+
+			Particle* part = *vec_it;
+			if (part->update()) {
+				vec_it++;
+			}
+
+			//Else erase the Particle from ParticleList. If ParticleList is empty after this,
+			//Erase the ParticleList from the map.
+			else {
+				vec_it = l->erase(vec_it);
+				if (l->empty()) {
+					particles_map.erase(map_it);
+				}
+			}
 		}
 	}
+
+
+	//auto it = particles.begin();
+
+	//while (it != particles.end()) {
+	//	if (it->update()) {
+	//		it++;
+	//	}
+	//	else {
+	//		it = particles.erase(it);
+	//	}
+	//}
 }
 
 void ParticleManager::addParticles(int x, int z) {
@@ -130,43 +190,14 @@ void ParticleManager::addParticles(int x, int z) {
 	4. randFrom() -> glm::vec3 to_push() -> particles.push_back(to_push, ...) works.
 	*/
 	glm::vec3 to_push = glm::vec3(x_c, 0.f, z_c);
-	particles.push_back(Particle(to_push,glm::vec3(3, 3, 3),1, 5, 0, 1, texture));
+	//particles.push_back(Particle(to_push,glm::vec3(3, 3, 3),1, 5, 0, 1, texture));
 	std::cout << "particles size:" << particles.size() << std::endl;
 
-	std::vector<Particle>* l = particles_map[texture];
+	std::vector<Particle*>* l = particles_map[texture];
 	if (l == NULL) {
-		particles_map[texture] = &std::vector<Particle>{Particle(to_push, glm::vec3(3, 3, 3), 1, 5, 0, 1, texture)};
+		std::cout << "l was null" << std::endl;
+		particles_map[texture] = new std::vector<Particle*>{new Particle(to_push, glm::vec3(3, 3, 3), 1, 5, 0, 1, texture)};
 	}
 	//particles.push_back(Particle(to_push, glm::vec3(3, 3, 3), 1, 5, 0, 1, texture));
 
 }
-
-//in Particle:
-//private ParticleTexture tex;
-//
-////in ParticleManager:
-//private ParticleTexture tex;
-////use it when you create a new particle...
-//map<ParticleTexture, List<Particle>> particles;
-////inaddParticle: 3:46
-//list particles.get(particle.texture);
-//if list null then:
-//particles.put(particle.texture, particle)
-////update:3:58
-//auto it = particles.begin(); it != particles.end()
-//	update() on it.value;
-//
-////render to render(map, camera)
-//for texture in map.keys:
-//	glActiveTexture(GL_TEXTURE0);
-//	glBindTexture(GL_TEXTURE_2D, texture.id);
-//	for particle_using_texture in map.values list:
-////in vert
-//	textureCoords.x = position.x + vec2(0.5, 0.5);
-//	textureCoords.y = 1.0 - position.y
-////in frag
-//	in vec2 textureCoords;
-//	uniform sampler2D particleTex;
-//
-//	color = texture(particletexture, texturecoords);
-//
