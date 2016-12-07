@@ -1,0 +1,109 @@
+Renderer: GeForce GTX 760/PCIe/SSE2
+OpenGL version supported 4.5.0 NVIDIA 353.82
+Supported GLSL version is 4.50 NVIDIA.
+Current GLEW version: 1.10.0
+ code 
+Compiling shader : ../shaders/heightmap.vert
+
+Compiling shader : ../shaders/heightmap.frag
+
+Linking program
+
+ code 
+Compiling shader : ../shaders/skybox.vert
+
+Compiling shader : ../shaders/skybox.frag
+
+Linking program
+
+ code 
+#version 330 core
+
+layout(points) in;
+layout(line_strip, max_vertices = 2) out;
+
+uniform mat4 mvp; // Model View Projection Matrix
+
+uniform float length = 1.0;
+
+in vec3 vertex_normal[];
+
+out vec3 vertex_color;
+
+void main(){
+	vec3 normal = vertex_normal[0];
+	
+	vertex_color = abs(normal);
+	
+	vec4 v0 = gl_in[0].gl_Position;
+	gl_Position = mvp * v0;
+	EmitVertex();
+	
+	vec4 v1 = v0 + vec4(normal * length, 0.0);
+	gl_Position = mvp * v1;
+	EmitVertex();
+	
+	EndPrimitive();
+}
+Compiling shader : ../shaders/normals.vert
+
+Compiling shader : ../shaders/normals.frag
+
+Compiling shader : ../shaders/normals.gs
+
+Linking program
+
+ code 
+Compiling shader : ../shaders/water.vert
+
+Compiling shader : ../shaders/water.frag
+
+Linking program
+
+ code 
+Compiling shader : ../shaders/particles_1.vert
+
+Compiling shader : ../shaders/particles_1.frag
+
+Linking program
+
+../water/waterDUDV.png
+../textures/ocean.jpg
+../textures/sand.jpg
+../textures/grass_4.jpg
+../textures/grass_3.jpg
+../textures/grass_rock.jpg
+../textures/snow.jpg
+Updating particle vector
+Updating particle vector
+Updating particle vector
+Updating particle vector
+Updating particle vector
+Updating particle vector
+Updating particle vector
+Updating particle vector
+Updating particle vector
+Updating particle vector
+Updating particle vector
+Updating particle vector
+Updating particle vector
+Updating particle vector
+Updating particle vector
+Updating particle vector
+Updating particle vector
+Updating particle vector
+Updating particle vector
+Updating particle vector
+Updating particle vector
+Updating particle vector
+Updating particle vector
+Updating particle vector
+Updating particle vector
+Updating particle vector
+Updating particle vector
+Updating particle vector
+Updating particle vector
+Updating particle vector
+Updating particle vector
+Updating particle vector
+Updating particle vector

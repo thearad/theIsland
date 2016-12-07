@@ -57,6 +57,15 @@
     <ClInclude Include="..\Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\Particle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ParticleManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Particles.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\main.cpp">
@@ -92,28 +101,56 @@
     <ClCompile Include="..\Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\Particle.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ParticleManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Particles.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="..\shader.frag">
+    <None Include="..\shaders\heightmap.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\shader.vert">
+    <None Include="..\shaders\heightmap.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\skyboxShader.frag">
+    <None Include="..\shaders\normals.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\skyboxShader.vert">
+    <None Include="..\shaders\normals.gs">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\normals.frag">
+    <None Include="..\shaders\normals.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\normals.gs">
+    <None Include="..\shaders\skybox.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\normals.vert">
+    <None Include="..\shaders\skybox.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\shaders\water.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\shaders\water.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\shaders\particles.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\shaders\particles.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="ClassDiagram.cd" />
+    <None Include="..\shaders\particles_1.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\shaders\particles_1.frag">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

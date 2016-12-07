@@ -16,6 +16,8 @@
 #include "HeightMap.h"
 #include "Water.h"
 #include "Camera.h"
+#include "ParticleManager.h"
+#include "Particle.h"
 
 class Window
 {

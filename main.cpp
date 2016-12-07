@@ -57,15 +57,6 @@ void setup_opengl_settings()
 	glDisable(GL_CULL_FACE);
 	// Set clear color
 	glClearColor(0.05f, 0.8f, 0.85f, 1.0f);
-
-	//glEnable(GL_FOG);
-	//GLfloat fogColor[4] = { 0.5, 0.5, 0.5, 1.0 };
-	//glFogi(GL_FOG_MODE, GL_EXP);
-	//glFogfv(GL_FOG_COLOR, fogColor);
-	//glFogf(GL_FOG_DENSITY, 0.35);
-	//glHint(GL_FOG_HINT, GL_DONT_CARE);
-	//glFogf(GL_FOG_START, 1.0);
-	//glFogf(GL_FOG_END, 5.0);
 }
 
 void print_versions()
@@ -82,6 +73,7 @@ void print_versions()
 
 int main(void)
 {
+	freopen("out.txt", "w", stdout);
 	// Create the GLFW window
 	window = Window::create_window(640, 480);
 	// Print OpenGL and GLSL versions
