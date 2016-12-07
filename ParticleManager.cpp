@@ -20,6 +20,7 @@ ParticleManager::~ParticleManager() {
 void ParticleManager::init() {
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO_vert);
+	glGenBuffers(1, &VBO_models);
 
 	glBindVertexArray(VAO);
 
@@ -28,14 +29,45 @@ void ParticleManager::init() {
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(VERTICES), VERTICES, GL_STATIC_DRAW);
 
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_models);
+	glBufferData(GL_ARRAY_BUFFER, models.size()*sizeof(glm::mat4), &models[0], GL_STATIC_DRAW);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (GLvoid*)0);
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (GLvoid*)(sizeof(glm::vec4)));
+	glEnableVertexAttribArray(3);
+	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (GLvoid*)(2 * sizeof(glm::vec4)));
+	glEnableVertexAttribArray(4);
+	glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (GLvoid*)(3 * sizeof(glm::vec4)));
+
+	glVertexAttribDivisor(0, 0);
+	glVertexAttribDivisor(1, 1);
+	glVertexAttribDivisor(2, 1);
+	glVertexAttribDivisor(3, 1);
+	glVertexAttribDivisor(4, 1);
+
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 }
 
+void ParticleManager::bindData() {
+	glBindVertexArray(VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_models);
+	glBufferData(GL_ARRAY_BUFFER, models.size() * sizeof(glm::mat4), &models[0], GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+}
 
 void ParticleManager::pre_render() {
 	glBindVertexArray(VAO);
+
 	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
+	glEnableVertexAttribArray(3);
+	glEnableVertexAttribArray(4);
+
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDepthMask(false);
@@ -44,7 +76,12 @@ void ParticleManager::pre_render() {
 void ParticleManager::post_render() {
 	glDepthMask(true);
 	glDisable(GL_BLEND);
+
 	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
+	glDisableVertexAttribArray(2);
+	glDisableVertexAttribArray(3);
+	glDisableVertexAttribArray(4);
 }
 
 void ParticleManager::loadParticleModel(glm::vec3 pos, float rotation, float scale, glm::mat4 viewMat) {
@@ -83,26 +120,29 @@ void ParticleManager::loadParticleModel(glm::vec3 pos, float rotation, float sca
 	//modelMat = glm::rotate(glm::mat4(1.f), degToRad(rotation), glm::vec3(0.f, 0.f, 1.f)) * modelMat;
 	//modelMat = glm::scale(glm::mat4(1.f), glm::vec3(scale, scale, scale)) * modelMat;
 
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &modelMat[0][0]);
+	//glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &modelMat[0][0]);
+	models.push_back(modelMat);
+	std::cout << "model is " << glm::to_string(modelMat) << std::endl;
 }
 
 void ParticleManager::render(Camera camera) {
 	update();
+	models.clear();
+	glm::mat4 viewMat = camera.GetViewMatrix();
+	for (int i = 0; i < particles.size(); i++) {
+		loadParticleModel(particles[i].position, particles[i].rotation, particles[i].scale, viewMat);
+	}
+	bindData();
 
 	pre_render();
 
-	glm::mat4 viewMat = camera.GetViewMatrix();
-
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &Window::P[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &viewMat[0][0]);
+	
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture.texId);
-
-	for (int i = 0; i < particles.size(); i++) {
-		std::cout << "Drawing particles[" << i << "]" << std::endl;
-		loadParticleModel(particles[i].position, particles[i].rotation, particles[i].scale, viewMat);
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, 12);
-	}
+	
+	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, particles.size());
 
 	post_render();
 }

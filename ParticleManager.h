@@ -30,9 +30,10 @@ private:
 		0.5f, 0.5f, 0.0f
 	};
 
-	GLuint VAO, VBO_vert;
+	GLuint VAO, VBO_vert, VBO_models;
 	GLuint shaderProgram;
 	std::vector<Particle> particles;
+	std::vector<glm::mat4> models;
 	
 	ParticleTexture texture;
 
@@ -40,6 +41,7 @@ public:
 	ParticleManager(GLuint shaderProgram);
 	~ParticleManager();
 	void init();
+	void bindData();
 
 	void loadParticleModel(glm::vec3 pos, float rotation, float scale, glm::mat4 viewMat);
 	void pre_render();
