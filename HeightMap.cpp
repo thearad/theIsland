@@ -134,15 +134,7 @@ void HeightMap::loadVertices(char* filename, GLfloat island_size) {
 
 			float v_h = data[(index_h*width + index_w) * 3]/255.f * 35.f - 2.f;
 
-			float dist_x = pow(0.f - (float)w, 2);
-			float dist_y = pow(0.f - (float)h, 2);
-			float dist = sqrt(dist_x + dist_y);
-			float dist_ratio = dist / max_width;
-
-			float gradient = dist_ratio * dist_ratio;
-			gradient = fmax(0.f, 1.f - gradient);
-
-			vertices.push_back(glm::vec3(w, gradient*abs(v_h), h));
+			vertices.push_back(glm::vec3(w, v_h, h));
 			index_w++;
 		}
 		index_h++;
