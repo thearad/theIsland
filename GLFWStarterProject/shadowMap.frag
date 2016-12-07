@@ -41,7 +41,7 @@ uniform sampler2D texSampler5;
 
 void main()
 {    
-    float range_cutoffs[] = {-.5f,-0.1f, 1.f, 2.5f, 5.f, 20.f};
+    float range_cutoffs[] = float [] (-.5f,-0.1f, 1.f, 2.5f, 5.f, 20.f);
     
 	// Shadows------------------------------------------------------
 	vec3 diffuse, ambient;

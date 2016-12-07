@@ -17,19 +17,15 @@ uniform sampler2D texSampler5;
 
 void main()
 {    
-    float range_cutoffs[] = {-.5f,-0.1f, 1.f, 2.5f, 5.f, 20.f};
-    
+    float range_cutoffs[] = float [] (-.5f,-0.1f, 1.f, 2.5f, 5.f, 20.f);
+	
     // Textures------------------------------------------------------
     vec4 texColor;
     
-    // if (FragPos.y <= range_cutoffs[0]){
-        // texColor = texture(texSampler0, TexCoord);
-        // color = vec4(texColor.xyz, 0.0f);
-    // }
     if (FragPos.y <= range_cutoffs[1]) {
-        float range = range_cutoffs[1] - range_cutoffs[0];
-        float fraction = (FragPos.y - range_cutoffs[0])/range;
-        texColor = vec4(texture(texSampler0, TexCoord).xyz, 0.f)*(1-fraction) + vec4(texture(texSampler1, TexCoord).xyz, 1.f)*fraction;
+        // float range = range_cutoffs[1] - range_cutoffs[0];
+        // float fraction = (FragPos.y - range_cutoffs[0])/range;
+        // texColor = vec4(texture(texSampler0, TexCoord).xyz, 0.f)*(1-fraction) + vec4(texture(texSampler1, TexCoord).xyz, 1.f)*fraction;
         color = vec4(texture(texSampler1, TexCoord).xyz, 1.f);
     }
     else if (FragPos.y <= range_cutoffs[2]) {
@@ -61,6 +57,6 @@ void main()
         texColor = texture(texSampler5, TexCoord);
         color = vec4(texColor.xyz, 1.0f);
     }
-    color = mix(vec4(0.4, 0.4, 0.4, 0.0), color, Visibility);
+    color = mix(vec4(0.6, 0.6, 0.6, 0.0), color, Visibility);
     
 }

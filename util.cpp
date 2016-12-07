@@ -99,4 +99,26 @@ namespace util {
 		float pitch = atan2(sqrt(dz*dz + dx*dx), dy);
 		return pitch;
 	}
+
+	float* mat4ToArr(glm::mat4 mat) {
+		float dArray[16] = { 0.0 };
+
+		const float *pSource = (const float*)glm::value_ptr(mat);
+		for (int i = 0; i < 16; ++i)
+			dArray[i] = pSource[i];
+
+		return dArray;
+	}
+
+	float degToRad(float degree) {
+		return degree * PI / 180.f;
+	}
+
+	float randRad() {
+		return degToRad(randFrom(1, 360));
+	}
+
+	float randFrom(int min, int max) {
+		return min + (rand() % (int)(max - 1 + min));
+	}
 }

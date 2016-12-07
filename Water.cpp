@@ -42,14 +42,19 @@ void Water::init() {
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 	glGenBuffers(1, &EBO);
+
+	glBindVertexArray(VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (GLvoid*)0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
 }
 
 void Water::bindData() {
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3)*vertices.size(), &vertices[0].x, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (GLvoid*)0);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint)*indices.size(), &indices[0], GL_STATIC_DRAW);
@@ -165,7 +170,25 @@ void Water::setActiveTextures() {
 	glBindTexture(GL_TEXTURE_2D, dudv);
 }
 
+void Water::unsetActiveTextures() {
+	//Bind textures to be used to active texture locations
+	glActiveTexture(GL_TEXTURE0 + REFLECTION);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glActiveTexture(GL_TEXTURE0 + REFRACTION);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glActiveTexture(GL_TEXTURE0 + DUDV);
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+
 void Water::draw(GLuint shaderProgram) {
+	glEnableVertexAttribArray(0);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glDepthMask(true);
+
 	loadShaderData(shaderProgram);
 	setActiveTextures();
 
@@ -173,4 +196,8 @@ void Water::draw(GLuint shaderProgram) {
 	glBindVertexArray(VAO);
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
+	unsetActiveTextures();
+	glDisableVertexAttribArray(0);
+
+	glDisable(GL_BLEND);
 }

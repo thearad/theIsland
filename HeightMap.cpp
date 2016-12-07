@@ -70,14 +70,16 @@ void HeightMap::loadTextures() {
 }
 
 void HeightMap::draw(GLuint shaderProgram) {
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
+
 	//Send misc. data
 	glm::mat4 model = glm::mat4(1.0);
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &Window::P[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &Window::V[0][0]);
 
-	//Bind all available textures. Send texture bind location to corresponding uniform shader_var
-	//See:https://www.opengl.org/wiki/Sampler_(GLSL) under Binding textures to samplers
 	for (int i = 0; i < textures.size(); i++) {
 		glActiveTexture(GL_TEXTURE0 + i); //switches texture bind location to GL_TEXTURE(0+i)
 		glBindTexture(GL_TEXTURE_2D, textures[i].first.getID()); //bind texture to active location
@@ -94,12 +96,11 @@ void HeightMap::draw(GLuint shaderProgram) {
 		glActiveTexture(GL_TEXTURE0 + i); //switches texture bind location to GL_TEXTURE(0+i)
 		glBindTexture(GL_TEXTURE_2D, 0); //bind texture to active location
 	}
-}
 
-void HeightMap::quickDraw() {
-	glBindVertexArray(VAO);
-	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-	glBindVertexArray(0);
+	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
+	glDisableVertexAttribArray(2);
+
 }
 
 void HeightMap::drawNormals(GLuint shaderProgram) {
