@@ -14,7 +14,6 @@ public:
 	~Sphere();
 
 	void draw(glm::mat4 M, GLuint shaderProgram);
-
 	GLuint VBO, SAO, NBO;
 	int tesselate, bezNumb;
 	float time;

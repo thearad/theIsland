@@ -4,6 +4,7 @@ layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
 layout (location = 2) in vec2 texCoord;
 
+uniform float isSphere;
 uniform vec3 lightInvDir;
 uniform mat4 staticview;
 uniform mat4 projection;
@@ -28,15 +29,15 @@ void main()
 {
     vec4 camSpace = view * model * vec4(position, 1.f);
     gl_ClipDistance[0]=dot(model* vec4(position, 1.f), clippingPlane);
-
-    gl_Position = projection * camSpace;
+	gl_Position = projection * camSpace;
+	
+    
     
     //http://stackoverflow.com/questions/14196252/rotate-normals-in-shader
     mat3 NormalMatrix = transpose(inverse(mat3(model)));    
     Normal = normalize(NormalMatrix * normal);
         
     FragPos = vec3(model * vec4(position, 1.0));
-    
     TexCoord = texCoord;
     
 	shadowCoord = depthBiasMVP * vec4(position,1.0);

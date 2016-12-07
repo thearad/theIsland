@@ -70,14 +70,17 @@ void HeightMap::loadTextures() {
 }
 
 void HeightMap::draw(GLuint shaderProgram) {
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
+
 	//Send misc. data
 	glm::mat4 model = glm::mat4(1.0);
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &Window::P[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &Window::V[0][0]);
+	glUniform1f(glGetUniformLocation(shaderProgram, "isSphere"), 0);
 
-	//Bind all available textures. Send texture bind location to corresponding uniform shader_var
-	//See:https://www.opengl.org/wiki/Sampler_(GLSL) under Binding textures to samplers
 	for (int i = 0; i < textures.size(); i++) {
 		glActiveTexture(GL_TEXTURE0 + i); //switches texture bind location to GL_TEXTURE(0+i)
 		glBindTexture(GL_TEXTURE_2D, textures[i].first.getID()); //bind texture to active location
@@ -94,6 +97,11 @@ void HeightMap::draw(GLuint shaderProgram) {
 		glActiveTexture(GL_TEXTURE0 + i); //switches texture bind location to GL_TEXTURE(0+i)
 		glBindTexture(GL_TEXTURE_2D, 0); //bind texture to active location
 	}
+
+	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
+	glDisableVertexAttribArray(2);
+
 }
 
 void HeightMap::quickDraw() {
@@ -127,15 +135,7 @@ void HeightMap::loadVertices(char* filename, GLfloat island_size) {
 
 			float v_h = data[(index_h*width + index_w) * 3]/255.f * 35.f - 2.f;
 
-			float dist_x = pow(0.f - (float)w, 2);
-			float dist_y = pow(0.f - (float)h, 2);
-			float dist = sqrt(dist_x + dist_y);
-			float dist_ratio = dist / max_width;
-
-			float gradient = dist_ratio * dist_ratio;
-			gradient = fmax(0.f, 1.f - gradient);
-
-			vertices.push_back(glm::vec3(w, gradient*abs(v_h), h));
+			vertices.push_back(glm::vec3(w, v_h, h));
 			index_w++;
 		}
 		index_h++;

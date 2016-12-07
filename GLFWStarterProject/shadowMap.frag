@@ -12,6 +12,8 @@ in float Visibility;
 
 layout(location = 0) out vec4 color;
 
+uniform float isSphere;
+uniform sampler2D bgl_RenderedTexture;
 uniform sampler2DShadow shadowMap;
 uniform sampler2D texSampler0;
 uniform sampler2D texSampler1;
@@ -41,23 +43,16 @@ uniform sampler2D texSampler5;
 
 void main()
 {    
-    float range_cutoffs[] = {-.5f,-0.1f, 1.f, 2.5f, 5.f, 20.f};
+    float range_cutoffs[] = float [] (-.5f,-0.1f, 1.f, 2.5f, 5.f, 20.f);
     
+	float weight[5] = float[] (0.227027, 0.1945946, 0.1216216, 0.054054, 0.016216);
+
 	// Shadows------------------------------------------------------
-	vec3 diffuse, ambient;
-	vec3 specular = vec3(0.4,0.4,0.4);
+	vec3 ambient;
+	
 	vec3 lightColor = vec3(1,1,1);
 	float lightPower = 1.0f;
 	float visibility = 1.0f;
-    
-	//vec3 n = normalize(normal_cam);
-	vec3 n = Normal;
-	vec3 l = normalize(lightDir);
-	//vec3 l = vec3(1,1,1);
-	float cosTheta = clamp( dot( n,l ), 0,1 );
-	vec3 e = normalize(eyeDir);
-	vec3 r = reflect(-l, n);
-	float cosAlpha = clamp( dot( e,r ), 0,1 );
 
 	// Fixed bias, or...
 	float bias = 0.005;
@@ -113,9 +108,16 @@ void main()
         texColor = texture(texSampler5, TexCoord);
 		ambient = vec3(0.1,0.1,0.1) * texColor.xyz;
         color = vec4(texColor.xyz, 1.0f);
-    }//(Visibility+visibility) * 
-	//* cosTheta
-    color = vec4((ambient + ((Visibility+visibility)/2)*texColor.xyz* lightColor* lightPower* cosTheta), 1.0f); //+  ((Visibility+visibility)/2)*specular* lightColor* lightPower* pow(cosAlpha, 5)), 1.0f);
-	//color = mix(vec4(0.4, 0.4, 0.4, 0.0), color, Visibility);
-	//mix(vec4(0.4, 0.4, 0.4, 0.0), color, Visibility);
+    }
+
+    color = vec4((ambient + ((Visibility+visibility)/2)*texColor.xyz* lightColor* lightPower), 1.0f); //+  ((Visibility+visibility)/2)*specular* lightColor* lightPower* pow(cosAlpha, 5)), 1.0f);
+	if(isSphere == 1){
+		vec3 result = vec3(1,1,0.5) * weight[0]; // current fragment's contribution
+        for(int i = 1; i < 5; ++i)
+        {
+            result += (vec3(1,1,0.5)+ vec3(i,i, 0.0)) * weight[i];
+            result += (vec3(1,1,0.5)- vec3(i,i, 0.0)) * weight[i];
+        }
+		color = vec4(result, 1.0);
+	}
 }

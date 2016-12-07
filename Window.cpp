@@ -21,13 +21,18 @@ GLuint quad_programID;
 GLuint quad_vertexbuffer;
 GLuint texID;
 
+/*Adding ParticleManager variables*/
+ParticleManager* p_mgr;
+GLint particleShaderProgram;
+bool renderParticles = true;
+
 bool showMap = false, first = false;
 
 // On some systems you need to change this to the absolute path
 #define SHADER_PATH "../shaders/"
 #define SKYBOX_FACE_DIR "../skybox/"
 
-glm::vec3 lightInvDir = glm::vec3(-1, 20, 0);
+glm::vec3 lightInvDir = glm::vec3(15, 10, 2);
 Camera camera(glm::vec3(0.0f, 5.0f, 50.0f));
 bool keys[1024];
 GLfloat deltaTime = 0.0f, lastFrame = 0.0f;
@@ -45,16 +50,19 @@ glm::vec3 Window::lastPoint;
 void Window::initialize_objects()
 {
 	glm::mat4 depthViewMatrix, depthProjectionMatrix;
-	depthProjectionMatrix = glm::ortho<float>(-10, 10, -10, 10, -10, 20);
+	depthProjectionMatrix = glm::ortho<float>(-50, 50, -50, 50, -50, 100);
 	
 	depthViewMatrix = glm::lookAt(lightInvDir, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));//lightInvDir is freaking out
-	depthMVP = depthProjectionMatrix * depthViewMatrix;
+	depthMVP = depthProjectionMatrix * depthViewMatrix * glm::mat4(1.0f);
 
 	// Load the shader program. Make sure you have the correct filepath up top
 	heightmapShaderProgram = LoadShaders(SHADER_PATH "heightmap.vert", SHADER_PATH "heightmap.frag");
 	skyboxShaderProgram = LoadShaders(SHADER_PATH "skybox.vert", SHADER_PATH "skybox.frag");
 	normalsShaderProgram = LoadShaders(SHADER_PATH "normals.vert", SHADER_PATH "normals.frag", SHADER_PATH "normals.gs");
 	waterShaderProgram = LoadShaders(SHADER_PATH "water.vert", SHADER_PATH "water.frag");
+	
+	particleShaderProgram = LoadShaders(SHADER_PATH "particles.vert", SHADER_PATH "particles.frag");
+	
 	depthShaderProgram = LoadShaders("depth.vert", "depth.frag");
 	shadowmapShaderProgram = LoadShaders("shadowMap.vert", "shadowMap.frag");
 	//Render objects
@@ -62,7 +70,7 @@ void Window::initialize_objects()
 	water = new Water(200, 200);
 	sphere = new Sphere();
 	//ShadowMap logic with help from: http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-16-shadow-mapping/
-	dLightShadow = new ShadowMap(640,480);
+	dLightShadow = new ShadowMap(1280,960);
 
 	std::vector<const GLchar*> faces = {
 		SKYBOX_FACE_DIR "right.jpg", SKYBOX_FACE_DIR "left.jpg", SKYBOX_FACE_DIR "top.jpg",
@@ -73,13 +81,15 @@ void Window::initialize_objects()
 
 	heightmap = new HeightMap(200, 200);
 
+	p_mgr = new ParticleManager(particleShaderProgram);
+
 	static const GLfloat g_quad_vertex_buffer_data[] = {
-		-512.0f, -512.0f, 0.0f,
-		512.0f, -512.0f, 0.0f,
-		-512.0f,  512.0f, 0.0f,
-		-512.0f,  512.0f, 0.0f,
-		512.0f, -512.0f, 0.0f,
-		512.0f,  512.0f, 0.0f,
+		-640.0f, -480.0f, 0.0f,
+		640.0f, -480.0f, 0.0f,
+		-640.0f,  480.0f, 0.0f,
+		-640.0f,  480.0f, 0.0f,
+		640.0f, -480.0f, 0.0f,
+		640.0f,  480.0f, 0.0f,
 	};
 
 	glGenBuffers(1, &quad_vertexbuffer);
@@ -88,7 +98,7 @@ void Window::initialize_objects()
 
 	// Create and compile our GLSL program from the shaders
 	quad_programID = LoadShaders("pass.vert", "pass.frag");
-	texID = glGetUniformLocation(quad_programID, "texture");
+	texID = glGetUniformLocation(quad_programID, "texture_");
 
 }
 
@@ -169,13 +179,9 @@ void Window::idle_callback()
 //renders objects on the scene that require no multirendering
 void Window::render_scene() {
 	glUseProgram(skyboxShaderProgram);
-	if (showMap)
-		glViewport(0, 0, width/2, height);
 	skybox->draw(skyboxShaderProgram, staticView);
 
 	glUseProgram(heightmapShaderProgram);
-	if (showMap)
-		glViewport(0, 0, width/2, height);
 	heightmap->draw(heightmapShaderProgram);
 }
 
@@ -185,6 +191,9 @@ void Window::poll_movement() {
 	deltaTime = currentFrame - lastFrame;
 	lastFrame = currentFrame;
 	Do_Movement();
+
+	if (renderParticles)
+		p_mgr->generate(deltaTime, 200, 200);
 }
 
 glm::vec4 refract_clip = glm::vec4(0.f, -1.f, 0.f, 0.01f);
@@ -195,7 +204,7 @@ void Window::display_callback(GLFWwindow* window)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	/*FOR TESTING SHADOW MAP*/
 	if (showMap) {
-		staticView = V;
+		//staticView = V;
 		if (first) {
 			glfwSetWindowSize(window, width*2, height);
 			first = false;
@@ -212,8 +221,6 @@ void Window::display_callback(GLFWwindow* window)
 		// Set our "renderedTexture" sampler to user Texture Unit 0
 		glUniform1i(texID, 8);
 
-		//heightmap->draw(quad_programID);
-		// 1rst attribute buffer : vertices
 		glEnableVertexAttribArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
 		glVertexAttribPointer(
@@ -238,20 +245,22 @@ void Window::display_callback(GLFWwindow* window)
 		0.5, 0.5, 0.5, 1.0
 	);
 
-	glm::mat4 depthBiasMVP = biasMatrix*depthMVP;
+	glm::mat4 depthBiasMVP = biasMatrix*depthMVP;//biasMatrix*
 	
 	//ENABLE PLANE CLIPPING FOR WATER REFLECTION/REFRACTION
 	glEnable(GL_CLIP_DISTANCE0);
 
 	//FIRST PASS: SAVE TO WATER REFRACTION FBO-----------------------------------------------------------------
-	water->bindFrameBuffer(Water::REFRACTION);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//TO DO: I have no idea why, but if you don't render this twice, it screws up the refraction.
+	for (int i = 0; i < 2; i++) {
+		water->bindFrameBuffer(Water::REFRACTION);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glUniform4f(glGetUniformLocation(heightmapShaderProgram, "clippingPlane"), refract_clip.x, refract_clip.y, refract_clip.z, refract_clip.w);
-	glUniform4f(glGetUniformLocation(skyboxShaderProgram, "clippingPlane"), refract_clip.x, refract_clip.y, refract_clip.z, refract_clip.w);
+		glUniform4f(glGetUniformLocation(heightmapShaderProgram, "clippingPlane"), refract_clip.x, refract_clip.y, refract_clip.z, refract_clip.w);
+		glUniform4f(glGetUniformLocation(skyboxShaderProgram, "clippingPlane"), refract_clip.x, refract_clip.y, refract_clip.z, refract_clip.w);
 
-	render_scene();
-	
+		render_scene();
+	}
 	//SECOND PASS: SAVE TO WATER REFLECTION FBO------------------------------------------------------------------
 	water->bindFrameBuffer(Water::REFLECTION);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -266,7 +275,13 @@ void Window::display_callback(GLFWwindow* window)
 	V = camera.GetViewMatrix();
 
 	render_scene();
+	glUseProgram(particleShaderProgram);
+	p_mgr->render(camera);
 
+	glUseProgram(shadowmapShaderProgram);
+	glm::mat4 Model = glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3(0.5, 0.5, 0.5)), glm::vec3(3 * glm::vec3(staticView* glm::vec4(lightInvDir, 0)).x, 3 * glm::vec3(staticView* glm::vec4(lightInvDir, 0)).y, glm::vec3(staticView* glm::vec4(lightInvDir, 0)).z + 1));//(staticView * glm::vec4(, 0.0)
+	sphere->draw(Model, shadowmapShaderProgram);
+	
 	camera.Position.y += dist;
 	camera.Pitch *= -1;
 	camera.updateCameraVectors();
@@ -279,8 +294,10 @@ void Window::display_callback(GLFWwindow* window)
 	//glUniform4f(glGetUniformLocation(heightmapShaderProgram, "clippingPlane"), 0, 0, 0, 0);
 
 	glUseProgram(skyboxShaderProgram);
-	if (showMap)
-		glViewport(0, 0, width/2, height);
+	if (showMap) {
+		glViewport(0, 0, width / 2, height);
+		P = glm::perspective(camera.Zoom, (float)(width / 2) / (float)height, 0.1f, 1000.0f);
+	}
 	glUniform4f(glGetUniformLocation(skyboxShaderProgram, "clippingPlane"), 0, 0, 0, 0);
 	skybox->draw(skyboxShaderProgram, staticView);
 
@@ -294,11 +311,13 @@ void Window::display_callback(GLFWwindow* window)
 	glUniform3fv(glGetUniformLocation(shadowmapShaderProgram, "lightInvDir"), 1, &lightInvDir[0]);
 	glUniform4f(glGetUniformLocation(shadowmapShaderProgram, "clippingPlane"), 0, 0, 0, 0);
 	glUniformMatrix4fv(glGetUniformLocation(shadowmapShaderProgram, "staticview"), 1, GL_FALSE, &staticView[0][0]);
-	glm::mat4 Model = glm::translate(glm::mat4(1.0f), glm::vec3(staticView * glm::vec4(lightInvDir, 0.0)));
+	Model = glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3(0.5,0.5,0.5)),glm::vec3(4*glm::vec3(staticView* glm::vec4(lightInvDir, 0)).x, 4*glm::vec3(staticView* glm::vec4(lightInvDir, 0)).y, glm::vec3(staticView* glm::vec4(lightInvDir, 0)).z));//(staticView * glm::vec4(, 0.0)
 	sphere->draw(Model, shadowmapShaderProgram);
 	heightmap->draw(shadowmapShaderProgram);
 	//render_scene();
-	
+	glUseProgram(particleShaderProgram);
+	p_mgr->render(camera);
+
 	glUseProgram(waterShaderProgram);
 	if (showMap)
 		glViewport(0, 0, width/2, height);
@@ -333,8 +352,14 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		case GLFW_KEY_ESCAPE:
 			glfwSetWindowShouldClose(window, GL_TRUE);
 			break;
+		case GLFW_KEY_P:
+			renderParticles = !renderParticles;
+			break;
 		case GLFW_KEY_R:
 			heightmap->refresh(200, 200, 20.f);
+			break;
+		case GLFW_KEY_L:
+			heightmap->refresh("../terrain/terrain.ppm", 20.f);
 			break;
 		case GLFW_KEY_M:
 			if(showMap)
@@ -409,12 +434,13 @@ void Window::scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 }
 
 void Window::shadowPass() {
-	
+	dLightShadow->bind();
+	glViewport(0, 0, 1280, 960);
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	
-	dLightShadow->bind();
+	
 	glUseProgram(depthShaderProgram);
 	
 	GLuint depthMatrixID = glGetUniformLocation(depthShaderProgram, "depthMVP");

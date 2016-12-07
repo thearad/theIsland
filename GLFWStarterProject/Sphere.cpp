@@ -144,6 +144,7 @@ void Sphere::draw(glm::mat4 M, GLuint shaderProgram)
 	glUniformMatrix4fv(uProjection, 1, GL_FALSE, &Window::P[0][0]);
 	glUniformMatrix4fv(uModelview, 1, GL_FALSE, &M[0][0]);
 	glUniformMatrix4fv(uView, 1, GL_FALSE, &Window::V[0][0]);
+	glUniform1f(glGetUniformLocation(shaderProgram, "isSphere"), 1);
 	// Draw the sphere regardless of whether it was previously updated or not
 	glBindVertexArray(SAO);
 	glDrawArrays(GL_TRIANGLES, 0, sphereVertices.size());
