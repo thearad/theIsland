@@ -21,6 +21,11 @@ GLuint quad_programID;
 GLuint quad_vertexbuffer;
 GLuint texID;
 
+/*Adding ParticleManager variables*/
+ParticleManager* p_mgr;
+GLint particleShaderProgram;
+bool renderParticles = true;
+
 bool showMap = false, first = false;
 
 // On some systems you need to change this to the absolute path
@@ -55,6 +60,9 @@ void Window::initialize_objects()
 	skyboxShaderProgram = LoadShaders(SHADER_PATH "skybox.vert", SHADER_PATH "skybox.frag");
 	normalsShaderProgram = LoadShaders(SHADER_PATH "normals.vert", SHADER_PATH "normals.frag", SHADER_PATH "normals.gs");
 	waterShaderProgram = LoadShaders(SHADER_PATH "water.vert", SHADER_PATH "water.frag");
+	
+	particleShaderProgram = LoadShaders(SHADER_PATH "particles.vert", SHADER_PATH "particles.frag");
+	
 	depthShaderProgram = LoadShaders("depth.vert", "depth.frag");
 	shadowmapShaderProgram = LoadShaders("shadowMap.vert", "shadowMap.frag");
 	//Render objects
@@ -72,6 +80,8 @@ void Window::initialize_objects()
 	staticView = Window::V;
 
 	heightmap = new HeightMap(200, 200);
+
+	p_mgr = new ParticleManager(particleShaderProgram);
 
 	static const GLfloat g_quad_vertex_buffer_data[] = {
 		-512.0f, -512.0f, 0.0f,
@@ -185,6 +195,9 @@ void Window::poll_movement() {
 	deltaTime = currentFrame - lastFrame;
 	lastFrame = currentFrame;
 	Do_Movement();
+
+	if (renderParticles)
+		p_mgr->generate(deltaTime, 200, 200);
 }
 
 glm::vec4 refract_clip = glm::vec4(0.f, -1.f, 0.f, 0.01f);
@@ -298,7 +311,9 @@ void Window::display_callback(GLFWwindow* window)
 	sphere->draw(Model, shadowmapShaderProgram);
 	heightmap->draw(shadowmapShaderProgram);
 	//render_scene();
-	
+	glUseProgram(particleShaderProgram);
+	p_mgr->render(camera);
+
 	glUseProgram(waterShaderProgram);
 	if (showMap)
 		glViewport(0, 0, width/2, height);
@@ -332,6 +347,9 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 			break;
 		case GLFW_KEY_ESCAPE:
 			glfwSetWindowShouldClose(window, GL_TRUE);
+			break;
+		case GLFW_KEY_P:
+			renderParticles = !renderParticles;
 			break;
 		case GLFW_KEY_R:
 			heightmap->refresh(200, 200, 20.f);

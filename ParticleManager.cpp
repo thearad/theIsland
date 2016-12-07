@@ -90,8 +90,6 @@ void ParticleManager::loadParticleModel(glm::vec3 pos, float rotation, float sca
 	//move particle position by pos
 	glm::mat4 modelMat= glm::translate(glm::mat4(1.f), pos);
 
-	std::cout << "VIEWMAT: " << glm::to_string(viewMat) << std::endl;
-	std::cout << "MODELMAT: " << glm::to_string(modelMat) << std::endl;
 
 	//unproject model
 	float* modelArr = mat4ToArr(modelMat);
@@ -107,21 +105,11 @@ void ParticleManager::loadParticleModel(glm::vec3 pos, float rotation, float sca
 	modelArr[m20] = viewArr[m02];
 	modelArr[m21] = viewArr[m12];
 	modelArr[m22] = viewArr[m22];
-	//std::cout << "MODELARR \n{ " << std::endl;
-	//for (int i = 0; i < 16; i++) {
-	//	std::cout << modelArr[i] << ", ";
-	//	if (i % 4 == 0) std::cout << std::endl;
-	//}
-	//std::cout <<"} " << std::endl;
 	//copy data inside modelArr back into modelMat
 	memcpy(glm::value_ptr(modelMat), modelArr, sizeof(modelArr)*sizeof(float));
-	//std::cout << "MODELMAT AFTER: " << glm::to_string(glm::make_mat4(modelArr)) << std::endl;
-	////apply rotations and scale
+	//apply rotations and scale
 	modelMat = glm::scale(glm::mat4(1.f), glm::vec3(scale, scale, scale)) * modelMat;
-
-	//glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &modelMat[0][0]);
 	models.push_back(modelMat);
-	std::cout << "model is " << glm::to_string(modelMat) << std::endl;
 }
 
 void ParticleManager::render(Camera camera) {
@@ -149,7 +137,6 @@ void ParticleManager::render(Camera camera) {
 }
 
 void ParticleManager::update() {
-	std::cout << "Updating particle vector" << std::endl;
 	auto it = particles.begin();
 
 	while (it != particles.end()) {
@@ -186,7 +173,6 @@ void ParticleManager::addParticle(int x, int z) {
 	*/
 	glm::vec3 to_push = glm::vec3(x_c, 0.f, z_c);
 	particles.push_back(Particle(to_push,glm::vec3(3, 3, 3), 1, 10, 0, 0.3f));
-	//std::cout << "particles size:" << particles.size() << std::endl;
 
 }
 

@@ -103,6 +103,12 @@ void HeightMap::draw(GLuint shaderProgram) {
 
 }
 
+void HeightMap::quickDraw() {
+	glBindVertexArray(VAO);
+	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+}
+
 void HeightMap::drawNormals(GLuint shaderProgram) {
 	glm::mat4 mvp = Window::P* Window::V * glm::mat4(1.f);
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "mvp"), 1, GL_FALSE, &mvp[0][0]);
