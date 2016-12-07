@@ -88,7 +88,7 @@ void Window::initialize_objects()
 
 	// Create and compile our GLSL program from the shaders
 	quad_programID = LoadShaders("pass.vert", "pass.frag");
-	texID = glGetUniformLocation(quad_programID, "texture");
+	texID = glGetUniformLocation(quad_programID, "texture_");
 
 }
 
