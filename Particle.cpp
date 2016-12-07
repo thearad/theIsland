@@ -1,14 +1,13 @@
 #include "Particle.h"
 Particle::Particle(
 	glm::vec3 position, glm::vec3 velocity, float gravity_effect,
-	float life_length, float rotation, float scale, ParticleTexture texture) {
+	float life_length, float rotation, float scale) {
 	this->position = position;
 	this->velocity = velocity;
 	this->gravity_effect = gravity_effect;
 	this->life_length = life_length;
 	this->rotation = rotation;
 	this->scale = scale;
-	this->texture = texture;
 
 	this->prev_time = glfwGetTime();
 }

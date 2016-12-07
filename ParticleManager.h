@@ -29,7 +29,6 @@ private:
 	GLuint shaderProgram;
 	std::vector<Particle> particles;
 	
-	std::map<ParticleTexture, std::vector<Particle>*> particles_map;
 	ParticleTexture texture;
 
 public:

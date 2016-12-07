@@ -30,10 +30,9 @@ public:
 	float curr_time;
 	float elapsed_time;
 
-	ParticleTexture texture;
-
 	Particle(glm::vec3 position, glm::vec3 velocity, float gravity_effect,
-		float life_length, float rotation, float scale, ParticleTexture texture);
+		float life_length, float rotation, float scale);
+
 	bool update();
 
 };

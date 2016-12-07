@@ -130,14 +130,8 @@ void ParticleManager::addParticles(int x, int z) {
 	4. randFrom() -> glm::vec3 to_push() -> particles.push_back(to_push, ...) works.
 	*/
 	glm::vec3 to_push = glm::vec3(x_c, 0.f, z_c);
-	particles.push_back(Particle(to_push,glm::vec3(3, 3, 3),1, 5, 0, 1, texture));
+	particles.push_back(Particle(to_push,glm::vec3(3, 3, 3),1, 5, 0, 1));
 	std::cout << "particles size:" << particles.size() << std::endl;
-
-	std::vector<Particle>* l = particles_map[texture];
-	if (l == NULL) {
-		particles_map[texture] = &std::vector<Particle>{Particle(to_push, glm::vec3(3, 3, 3), 1, 5, 0, 1, texture)};
-	}
-	//particles.push_back(Particle(to_push, glm::vec3(3, 3, 3), 1, 5, 0, 1, texture));
 
 }
 
