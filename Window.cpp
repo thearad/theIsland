@@ -257,14 +257,16 @@ void Window::display_callback(GLFWwindow* window)
 	glEnable(GL_CLIP_DISTANCE0);
 
 	//FIRST PASS: SAVE TO WATER REFRACTION FBO-----------------------------------------------------------------
-	water->bindFrameBuffer(Water::REFRACTION);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//TO DO: I have no idea why, but if you don't render this twice, it screws up the refraction.
+	for (int i = 0; i < 2; i++) {
+		water->bindFrameBuffer(Water::REFRACTION);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glUniform4f(glGetUniformLocation(heightmapShaderProgram, "clippingPlane"), refract_clip.x, refract_clip.y, refract_clip.z, refract_clip.w);
-	glUniform4f(glGetUniformLocation(skyboxShaderProgram, "clippingPlane"), refract_clip.x, refract_clip.y, refract_clip.z, refract_clip.w);
+		glUniform4f(glGetUniformLocation(heightmapShaderProgram, "clippingPlane"), refract_clip.x, refract_clip.y, refract_clip.z, refract_clip.w);
+		glUniform4f(glGetUniformLocation(skyboxShaderProgram, "clippingPlane"), refract_clip.x, refract_clip.y, refract_clip.z, refract_clip.w);
 
-	render_scene();
-	
+		render_scene();
+	}
 	//SECOND PASS: SAVE TO WATER REFLECTION FBO------------------------------------------------------------------
 	water->bindFrameBuffer(Water::REFLECTION);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -279,6 +281,8 @@ void Window::display_callback(GLFWwindow* window)
 	V = camera.GetViewMatrix();
 
 	render_scene();
+	glUseProgram(particleShaderProgram);
+	p_mgr->render(camera);
 
 	camera.Position.y += dist;
 	camera.Pitch *= -1;
