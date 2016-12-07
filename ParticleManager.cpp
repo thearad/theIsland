@@ -9,7 +9,7 @@ ParticleManager::ParticleManager(GLuint shaderProgram) {
 		std::make_pair(GL_TEXTURE_MAG_FILTER, GL_LINEAR)
 	};
 
-	texture.texId = Texture("../particles/star.png", GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, SOIL_LOAD_RGBA, texParams).getID();
+	texture.texId = Texture("../particles/firefly_green.png", GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, SOIL_LOAD_RGBA, texParams).getID();
 	texture.numRows = 1;
 
 }
@@ -117,8 +117,7 @@ void ParticleManager::loadParticleModel(glm::vec3 pos, float rotation, float sca
 	memcpy(glm::value_ptr(modelMat), modelArr, sizeof(modelArr)*sizeof(float));
 	//std::cout << "MODELMAT AFTER: " << glm::to_string(glm::make_mat4(modelArr)) << std::endl;
 	////apply rotations and scale
-	//modelMat = glm::rotate(glm::mat4(1.f), degToRad(rotation), glm::vec3(0.f, 0.f, 1.f)) * modelMat;
-	//modelMat = glm::scale(glm::mat4(1.f), glm::vec3(scale, scale, scale)) * modelMat;
+	modelMat = glm::scale(glm::mat4(1.f), glm::vec3(scale, scale, scale)) * modelMat;
 
 	//glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &modelMat[0][0]);
 	models.push_back(modelMat);
@@ -143,6 +142,8 @@ void ParticleManager::render(Camera camera) {
 	glBindTexture(GL_TEXTURE_2D, texture.texId);
 	
 	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, particles.size());
+	
+	glBindTexture(GL_TEXTURE_2D, 0);
 
 	post_render();
 }
@@ -161,7 +162,7 @@ void ParticleManager::update() {
 	}
 }
 
-void ParticleManager::addParticles(int x, int z) {
+void ParticleManager::addParticle(int x, int z) {
 
 	//16:39
 	float x_c = randFrom(0, x / 2);
@@ -169,7 +170,7 @@ void ParticleManager::addParticles(int x, int z) {
 		x_c = -x_c;
 	}
 	float z_c = randFrom(0, z);
-	std::cout << "Adding a particle x: " << x_c << " z: " << z_c << std::endl;
+	//std::cout << "Adding a particle x: " << x_c << " z: " << z_c << std::endl;
 
 	/*
 	TODO: weirdest bug...
@@ -181,7 +182,17 @@ void ParticleManager::addParticles(int x, int z) {
 	4. randFrom() -> glm::vec3 to_push() -> particles.push_back(to_push, ...) works.
 	*/
 	glm::vec3 to_push = glm::vec3(x_c, 0.f, z_c);
-	particles.push_back(Particle(to_push,glm::vec3(3, 3, 3),1, 5, 0, 1));
-	std::cout << "particles size:" << particles.size() << std::endl;
+	particles.push_back(Particle(to_push,glm::vec3(3, 3, 3), 1, 10, 0, 0.3f));
+	//std::cout << "particles size:" << particles.size() << std::endl;
 
+}
+
+void ParticleManager::generate(float delta, int x, int z) {
+	int newparticles = (int)(delta*100.0);
+	if (newparticles > (int)(0.016f*100.0))
+		newparticles = (int)(0.016f*100.0);
+
+	for (int i = 0; i<newparticles; i++) {
+		addParticle(x, z);
+	}
 }

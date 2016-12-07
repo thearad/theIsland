@@ -21,6 +21,7 @@ GLint particleShaderProgram;
 Camera camera(glm::vec3(0.0f, 5.0f, 50.0f));
 bool keys[1024];
 GLfloat deltaTime = 0.0f, lastFrame = 0.0f;
+bool renderParticles = true;
 
 int Window::width;
 int Window::height;
@@ -134,11 +135,13 @@ void Window::idle_callback()
 
 //renders objects on the scene that require no multirendering
 void Window::render_scene() {
+
 	glUseProgram(skyboxShaderProgram);
 	skybox->draw(skyboxShaderProgram);
 
-	//glUseProgram(heightmapShaderProgram);
-	//heightmap->draw(heightmapShaderProgram);
+	glUseProgram(heightmapShaderProgram);
+	heightmap->draw(heightmapShaderProgram);
+
 }
 
 //polls for WASD movements
@@ -147,58 +150,71 @@ void Window::poll_movement() {
 	deltaTime = currentFrame - lastFrame;
 	lastFrame = currentFrame;
 	Do_Movement();
+
+	if (renderParticles)
+		p_mgr->generate(deltaTime, 100, 100);
 }
 
 glm::vec4 refract_clip = glm::vec4(0.f, -1.f, 0.f, 0.01f);
 glm::vec4 reflect_clip = glm::vec4(0.f, 1.f, 0.f, -0.01f);
 void Window::display_callback(GLFWwindow* window)
 {
-	////ENABLE PLANE CLIPPING FOR WATER REFLECTION/REFRACTION
-	//glEnable(GL_CLIP_DISTANCE0);
+	//ENABLE PLANE CLIPPING FOR WATER REFLECTION/REFRACTION
+	glEnable(GL_CLIP_DISTANCE0);
 
-	////FIRST PASS: SAVE TO WATER REFRACTION FBO-----------------------------------------------------------------
-	//water->bindFrameBuffer(Water::REFRACTION);
+	water->bindFrameBuffer(Water::REFRACTION);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//glUniform4f(glGetUniformLocation(heightmapShaderProgram, "clippingPlane"), refract_clip.x, refract_clip.y, refract_clip.z, refract_clip.w);
-	//glUniform4f(glGetUniformLocation(skyboxShaderProgram, "clippingPlane"), refract_clip.x, refract_clip.y, refract_clip.z, refract_clip.w);
+	glUniform4f(glGetUniformLocation(heightmapShaderProgram, "clippingPlane"), refract_clip.x, refract_clip.y, refract_clip.z, refract_clip.w);
+	glUniform4f(glGetUniformLocation(skyboxShaderProgram, "clippingPlane"), refract_clip.x, refract_clip.y, refract_clip.z, refract_clip.w);
 
-	//render_scene();
-	//
-	////SECOND PASS: SAVE TO WATER REFLECTION FBO------------------------------------------------------------------
-	//water->bindFrameBuffer(Water::REFLECTION);
-	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	render_scene();
 
-	//glUniform4f(glGetUniformLocation(heightmapShaderProgram, "clippingPlane"), reflect_clip.x, reflect_clip.y, reflect_clip.z, reflect_clip.w);
-	//glUniform4f(glGetUniformLocation(skyboxShaderProgram, "clippingPlane"), reflect_clip.x, reflect_clip.y, reflect_clip.z, reflect_clip.w);
+	//FIRST PASS: SAVE TO WATER REFRACTION FBO-----------------------------------------------------------------
+	water->bindFrameBuffer(Water::REFRACTION);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//float dist = 2 * camera.Position.y - 0.01f;
-	//camera.Position.y -= dist;
-	//camera.Pitch *= -1;
-	//camera.updateCameraVectors();
-	//V = camera.GetViewMatrix();
+	glUniform4f(glGetUniformLocation(heightmapShaderProgram, "clippingPlane"), refract_clip.x, refract_clip.y, refract_clip.z, refract_clip.w);
+	glUniform4f(glGetUniformLocation(skyboxShaderProgram, "clippingPlane"), refract_clip.x, refract_clip.y, refract_clip.z, refract_clip.w);
 
-	//render_scene();
+	render_scene();
+	//SECOND PASS: SAVE TO WATER REFLECTION FBO------------------------------------------------------------------
+	water->bindFrameBuffer(Water::REFLECTION);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//camera.Position.y += dist;
-	//camera.Pitch *= -1;
-	//camera.updateCameraVectors();
-	//V = camera.GetViewMatrix();
+	glUniform4f(glGetUniformLocation(heightmapShaderProgram, "clippingPlane"), reflect_clip.x, reflect_clip.y, reflect_clip.z, reflect_clip.w);
+	glUniform4f(glGetUniformLocation(skyboxShaderProgram, "clippingPlane"), reflect_clip.x, reflect_clip.y, reflect_clip.z, reflect_clip.w);
 
-	////THIRD PASS: RENDER SCENE NORMALLY ----------------------------------------------------------------------------
-	//water->unbindFrameBuffer();
-	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	float dist = 2 * camera.Position.y - 0.01f;
+	camera.Position.y -= dist;
+	camera.Pitch *= -1;
+	camera.updateCameraVectors();
+	V = camera.GetViewMatrix();
 
-	//glUniform4f(glGetUniformLocation(heightmapShaderProgram, "clippingPlane"), 0, 0, 0, 0);
-	//glUniform4f(glGetUniformLocation(skyboxShaderProgram, "clippingPlane"), 0, 0, 0, 0);
-	//glUniform3f(glGetUniformLocation(waterShaderProgram, "camera_Position"), camera.Position.x, camera.Position.y, camera.Position.z);
+	render_scene();
+
+	glUseProgram(particleShaderProgram);
+	p_mgr->render(camera);
+
+	camera.Position.y += dist;
+	camera.Pitch *= -1;
+	camera.updateCameraVectors();
+	V = camera.GetViewMatrix();
+
+	//THIRD PASS: RENDER SCENE NORMALLY ----------------------------------------------------------------------------
+	water->unbindFrameBuffer();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glUniform4f(glGetUniformLocation(heightmapShaderProgram, "clippingPlane"), 0, 0, 0, 0);
+	glUniform4f(glGetUniformLocation(skyboxShaderProgram, "clippingPlane"), 0, 0, 0, 0);
+	glUniform3f(glGetUniformLocation(waterShaderProgram, "camera_Position"), camera.Position.x, camera.Position.y, camera.Position.z);
 
 	render_scene();
 	glUseProgram(particleShaderProgram);
 	p_mgr->render(camera);
-	
-	//glUseProgram(waterShaderProgram);
-	//water->draw(waterShaderProgram);
+
+	glUseProgram(waterShaderProgram);
+	water->draw(waterShaderProgram);
 
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
@@ -228,8 +244,8 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		case GLFW_KEY_ESCAPE:
 			glfwSetWindowShouldClose(window, GL_TRUE);
 			break;
-		case GLFW_KEY_Y:
-			p_mgr->addParticles(200, 200);
+		case GLFW_KEY_P:
+			renderParticles = !renderParticles;
 			break;
 		case GLFW_KEY_R:
 			heightmap->refresh(200, 200, 20.f);

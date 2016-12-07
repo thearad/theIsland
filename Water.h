@@ -58,6 +58,8 @@ public:
 	
 	void loadShaderData(GLuint shaderProgram);
 	void setActiveTextures();
+	void unsetActiveTextures();
+
 	void draw(GLuint shaderProgram);
 
 	void genTexCoords();

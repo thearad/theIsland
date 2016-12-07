@@ -43,7 +43,8 @@ bool Particle::update() {
 	change = glm::vec3(glm::scale(glm::mat4(1.f), glm::vec3(frame_time, frame_time, frame_time)) * glm::vec4(change, 1.f));
 
 	position += change;
-
+	if (position.y < 0.f)
+		return false;
 	elapsed_time += frame_time;
 
 	return elapsed_time < life_length;

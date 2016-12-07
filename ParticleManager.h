@@ -49,5 +49,6 @@ public:
 	void post_render();
 
 	void update();
-	void addParticles(int x, int y);
+	void addParticle(int x, int y);
+	void generate(float delta, int x, int z);
 };

@@ -170,7 +170,25 @@ void Water::setActiveTextures() {
 	glBindTexture(GL_TEXTURE_2D, dudv);
 }
 
+void Water::unsetActiveTextures() {
+	//Bind textures to be used to active texture locations
+	glActiveTexture(GL_TEXTURE0 + REFLECTION);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glActiveTexture(GL_TEXTURE0 + REFRACTION);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glActiveTexture(GL_TEXTURE0 + DUDV);
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+
 void Water::draw(GLuint shaderProgram) {
+	glEnableVertexAttribArray(0);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glDepthMask(true);
+
 	loadShaderData(shaderProgram);
 	setActiveTextures();
 
@@ -178,4 +196,8 @@ void Water::draw(GLuint shaderProgram) {
 	glBindVertexArray(VAO);
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
+	unsetActiveTextures();
+	glDisableVertexAttribArray(0);
+
+	glDisable(GL_BLEND);
 }
