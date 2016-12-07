@@ -90,7 +90,7 @@ void HeightMap::draw(GLuint shaderProgram) {
 	glBindVertexArray(0);
 
 	//unbind textures
-	for (int i = 0; i < textures.size()+1; i++) {
+	for (int i = 0; i < textures.size(); i++) {
 		glActiveTexture(GL_TEXTURE0 + i); //switches texture bind location to GL_TEXTURE(0+i)
 		glBindTexture(GL_TEXTURE_2D, 0); //bind texture to active location
 	}

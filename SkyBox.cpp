@@ -2,7 +2,7 @@
 
 // Other Libs
 #include <SOIL.h>
-
+bool Window::showMap;
 
 SkyBox::SkyBox(std::vector<const GLchar*> faces) {
 	// Setup skybox VAO
@@ -54,7 +54,7 @@ GLuint SkyBox::loadCubeMap(std::vector<const GLchar*> faces) {
 	return textureID;
 }
 
-void SkyBox::draw(GLuint shaderProgram) {
+void SkyBox::draw(GLuint shaderProgram, glm::mat4 VIEW) {
 	glDepthMask(GL_FALSE);
 
 	glm::mat4 model = glm::mat4(1.0);
@@ -63,6 +63,12 @@ void SkyBox::draw(GLuint shaderProgram) {
 
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
+	/*if (!Window::showMap) {
+		glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
+	}
+	else {
+		glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(VIEW));
+	}*/
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
 	glBindVertexArray(skyboxVAO);

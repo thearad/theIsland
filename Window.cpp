@@ -7,6 +7,7 @@ HeightMap* heightmap;
 Water* water;
 ShadowMap * dLightShadow;
 Sphere * sphere;
+GLFWwindow * map;
 glm::mat4 depthMVP;
 glm::mat4 staticView;
 
@@ -20,7 +21,7 @@ GLuint quad_programID;
 GLuint quad_vertexbuffer;
 GLuint texID;
 
-bool showMap = false;
+bool showMap = false, first = false;
 
 // On some systems you need to change this to the absolute path
 #define SHADER_PATH "../shaders/"
@@ -61,7 +62,7 @@ void Window::initialize_objects()
 	water = new Water(200, 200);
 	sphere = new Sphere();
 	//ShadowMap logic with help from: http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-16-shadow-mapping/
-	dLightShadow = new ShadowMap(1280,960);
+	dLightShadow = new ShadowMap(640,480);
 
 	std::vector<const GLchar*> faces = {
 		SKYBOX_FACE_DIR "right.jpg", SKYBOX_FACE_DIR "left.jpg", SKYBOX_FACE_DIR "top.jpg",
@@ -73,12 +74,12 @@ void Window::initialize_objects()
 	heightmap = new HeightMap(200, 200);
 
 	static const GLfloat g_quad_vertex_buffer_data[] = {
-		-1.0f, -1.0f, 0.0f,
-		1.0f, -1.0f, 0.0f,
-		-1.0f,  1.0f, 0.0f,
-		-1.0f,  1.0f, 0.0f,
-		1.0f, -1.0f, 0.0f,
-		1.0f,  1.0f, 0.0f,
+		-512.0f, -512.0f, 0.0f,
+		512.0f, -512.0f, 0.0f,
+		-512.0f,  512.0f, 0.0f,
+		-512.0f,  512.0f, 0.0f,
+		512.0f, -512.0f, 0.0f,
+		512.0f,  512.0f, 0.0f,
 	};
 
 	glGenBuffers(1, &quad_vertexbuffer);
@@ -151,7 +152,7 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 	Window::height = height;
 	// Set the viewport size. This is the only matrix that OpenGL maintains for us in modern OpenGL!
 	glViewport(0, 0, width, height);
-
+	//dLightShadow = new ShadowMap(640, 480);
 	if (height > 0)
 	{
 		V = camera.GetViewMatrix();
@@ -168,9 +169,13 @@ void Window::idle_callback()
 //renders objects on the scene that require no multirendering
 void Window::render_scene() {
 	glUseProgram(skyboxShaderProgram);
-	skybox->draw(skyboxShaderProgram);
+	if (showMap)
+		glViewport(0, 0, width/2, height);
+	skybox->draw(skyboxShaderProgram, staticView);
 
 	glUseProgram(heightmapShaderProgram);
+	if (showMap)
+		glViewport(0, 0, width/2, height);
 	heightmap->draw(heightmapShaderProgram);
 }
 
@@ -190,17 +195,24 @@ void Window::display_callback(GLFWwindow* window)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	/*FOR TESTING SHADOW MAP*/
 	if (showMap) {
-		width = width * 2;
-		glViewport(0, 0, width, height);
+		staticView = V;
+		if (first) {
+			glfwSetWindowSize(window, width*2, height);
+			first = false;
+		}
+		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glDisable(GL_COMPARE_R_TO_TEXTURE);
+		
 		glUseProgram(quad_programID);
-
+		
+		glViewport(width/2, 0, width/2, height);
 		// Bind our texture in Texture Unit 0
-		glActiveTexture(GL_TEXTURE0);
+		glActiveTexture(GL_TEXTURE8);
 		glBindTexture(GL_TEXTURE_2D, dLightShadow->depth);
 		// Set our "renderedTexture" sampler to user Texture Unit 0
-		glUniform1i(texID, 0);
+		glUniform1i(texID, 8);
 
+		//heightmap->draw(quad_programID);
 		// 1rst attribute buffer : vertices
 		glEnableVertexAttribArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
@@ -217,9 +229,8 @@ void Window::display_callback(GLFWwindow* window)
 		// You have to disable GL_COMPARE_R_TO_TEXTURE above in order to see anything !
 		glDrawArrays(GL_TRIANGLES, 0, 6); // 2*3 indices starting at 0 -> 2 triangles
 		glDisableVertexAttribArray(0);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
-	
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glm::mat4 biasMatrix(
 		0.5, 0.0, 0.0, 0.0,
 		0.0, 0.5, 0.0, 0.0,
@@ -263,15 +274,19 @@ void Window::display_callback(GLFWwindow* window)
 
 	//THIRD PASS: RENDER SCENE NORMALLY ----------------------------------------------------------------------------
 	water->unbindFrameBuffer();
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	//printf("%i %i %i", lightInvDir.x, lightInvDir.y, lightInvDir.z);
 	//glUniform4f(glGetUniformLocation(heightmapShaderProgram, "clippingPlane"), 0, 0, 0, 0);
 
 	glUseProgram(skyboxShaderProgram);
+	if (showMap)
+		glViewport(0, 0, width/2, height);
 	glUniform4f(glGetUniformLocation(skyboxShaderProgram, "clippingPlane"), 0, 0, 0, 0);
-	skybox->draw(skyboxShaderProgram);
+	skybox->draw(skyboxShaderProgram, staticView);
 
 	glUseProgram(shadowmapShaderProgram);
+	if (showMap)
+		glViewport(0, 0, width/2, height);
 	glActiveTexture(GL_TEXTURE9); //switches texture bind location to GL_TEXTURE(0+i)
 	glBindTexture(GL_TEXTURE_2D, dLightShadow->depth); //bind texture to active location
 	glUniform1i(glGetUniformLocation(shadowmapShaderProgram, "shadowMap"), 9); //sets uniform sampler2D texSampleri's texture bind loc.
@@ -285,6 +300,8 @@ void Window::display_callback(GLFWwindow* window)
 	//render_scene();
 	
 	glUseProgram(waterShaderProgram);
+	if (showMap)
+		glViewport(0, 0, width/2, height);
 	glUniform3f(glGetUniformLocation(waterShaderProgram, "camera_Position"), camera.Position.x, camera.Position.y, camera.Position.z);
 	water->draw(waterShaderProgram);
 	
@@ -320,7 +337,11 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 			heightmap->refresh(200, 200, 20.f);
 			break;
 		case GLFW_KEY_M:
+			if(showMap)
+				glfwDestroyWindow(map);
+			first = true;
 			showMap = !showMap;
+			
 			break;
 		}
 		

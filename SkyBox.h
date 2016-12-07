@@ -31,7 +31,7 @@ public:
 	SkyBox(std::vector<const GLchar*> faces);
 
 	GLuint loadCubeMap(std::vector<const GLchar*> faces);
-	void draw(GLuint shaderProgram);
+	void draw(GLuint shaderProgram, glm::mat4 view);
 };
 
 const GLfloat skyboxVertices[] = {

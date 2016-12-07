@@ -50,7 +50,8 @@ void main()
 	float lightPower = 1.0f;
 	float visibility = 1.0f;
     
-	vec3 n = normalize(normal_cam);
+	//vec3 n = normalize(normal_cam);
+	vec3 n = Normal;
 	vec3 l = normalize(lightDir);
 	//vec3 l = vec3(1,1,1);
 	float cosTheta = clamp( dot( n,l ), 0,1 );
