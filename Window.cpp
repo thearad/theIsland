@@ -40,8 +40,7 @@ void Window::initialize_objects()
 	skyboxShaderProgram = LoadShaders(SHADER_PATH "skybox.vert", SHADER_PATH "skybox.frag");
 	normalsShaderProgram = LoadShaders(SHADER_PATH "normals.vert", SHADER_PATH "normals.frag", SHADER_PATH "normals.gs");
 	waterShaderProgram = LoadShaders(SHADER_PATH "water.vert", SHADER_PATH "water.frag");
-	//particleShaderProgram = LoadShaders(SHADER_PATH "particles.vert", SHADER_PATH "particles.frag");
-	particleShaderProgram = LoadShaders(SHADER_PATH "particles_1.vert", SHADER_PATH "particles_1.frag");
+	particleShaderProgram = LoadShaders(SHADER_PATH "particles.vert", SHADER_PATH "particles.frag");
 
 	//Render objects
 	cube = new Cube();
@@ -152,7 +151,7 @@ void Window::poll_movement() {
 	Do_Movement();
 
 	if (renderParticles)
-		p_mgr->generate(deltaTime, 100, 100);
+		p_mgr->generate(deltaTime, 200, 200);
 }
 
 glm::vec4 refract_clip = glm::vec4(0.f, -1.f, 0.f, 0.01f);

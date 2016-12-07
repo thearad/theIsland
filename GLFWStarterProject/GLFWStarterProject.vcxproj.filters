@@ -63,9 +63,6 @@
     <ClInclude Include="..\ParticleManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Particles.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\main.cpp">
@@ -107,9 +104,6 @@
     <ClCompile Include="..\ParticleManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Particles.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -147,12 +141,6 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="ClassDiagram.cd" />
-    <None Include="..\shaders\particles_1.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\shaders\particles_1.frag">
-      <Filter>Shaders</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\skybox\back.JPG">

@@ -170,6 +170,9 @@ void ParticleManager::addParticle(int x, int z) {
 		x_c = -x_c;
 	}
 	float z_c = randFrom(0, z);
+	if (rand() % 2 < 1) {
+		z_c = -z_c;
+	}
 	//std::cout << "Adding a particle x: " << x_c << " z: " << z_c << std::endl;
 
 	/*
