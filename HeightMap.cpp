@@ -60,7 +60,7 @@ void HeightMap::bindData() {
 void HeightMap::loadTextures() {
 	std::string path = "../textures/";
 	std::vector<std::string> sTextureNames = {
-		"ocean.jpg", "sand.jpg", "grass_4.jpg", "grass_3.jpg", "grass_rock.jpg", "snow.jpg"
+		"ocean.jpg", "sand.jpg", "grass_4.jpg", "grass_3.jpg", "grass_rock.jpg", "snow.jpg" 
 	};
 	for (int i = 0; i < sTextureNames.size(); i++) {
 		textures.push_back(
