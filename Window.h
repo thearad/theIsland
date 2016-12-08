@@ -17,6 +17,12 @@
 #include "Water.h"
 #include "Camera.h"
 
+#include "ParticleManager.h"
+#include "Particle.h"
+
+#include "GLFWStarterProject\Sphere.h"
+#include "GLFWStarterProject\ShadowMap.h"
+
 class Window
 {
 private:
@@ -28,6 +34,8 @@ public:
 	static int height;
 	static glm::mat4 P; // P for projection
 	static glm::mat4 V; // V for view
+
+	static bool showMap;
 	static void initialize_objects();
 	static void clean_up();
 	static GLFWwindow* create_window(int width, int height);
@@ -44,7 +52,7 @@ public:
 	static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 	static void Do_Movement();
-
+	static void shadowPass();
 };
 
 #endif

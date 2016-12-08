@@ -46,6 +46,7 @@ public:
 		std::string path,
 		//glTexImage2D Params
 		GLint internalFormat = GL_RGB, GLenum format = GL_RGB, GLenum type = GL_UNSIGNED_BYTE,
+		int soilFormat = SOIL_LOAD_RGB,
 		//glTexParameteri settings
 		std::vector<std::pair<GLenum, GLint>> texParams = { 
 			std::make_pair(GL_TEXTURE_WRAP_S, GL_REPEAT),

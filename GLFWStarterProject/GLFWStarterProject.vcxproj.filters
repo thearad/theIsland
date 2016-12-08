@@ -57,6 +57,18 @@
     <ClInclude Include="..\Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ShadowMap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Sphere.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Particle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ParticleManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\main.cpp">
@@ -92,6 +104,18 @@
     <ClCompile Include="..\Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ShadowMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Sphere.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Particle.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ParticleManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -114,6 +138,24 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\normals.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="depth.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="depth.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="pass.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="pass.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shadowMap.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shadowMap.frag">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

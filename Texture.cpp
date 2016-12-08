@@ -22,7 +22,7 @@ Texture::Texture(int width, int height, GLint internalFormat, GLenum format, GLe
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-Texture::Texture(std::string path, GLint internalFormat, GLenum format, GLenum type, std::vector<std::pair<GLenum, GLint>> texParams) {
+Texture::Texture(std::string path, GLint internalFormat, GLenum format, GLenum type, int soilFormat, std::vector<std::pair<GLenum, GLint>> texParams) {
 	std::cout << path.c_str() << std::endl;
 	//Generate a texture
 	glGenTextures(1, &id);
@@ -32,7 +32,7 @@ Texture::Texture(std::string path, GLint internalFormat, GLenum format, GLenum t
 
 	//load img from path into texture
 	unsigned char* img;
-	img = SOIL_load_image(path.c_str(), &width, &height, 0, SOIL_LOAD_RGB);
+	img = SOIL_load_image(path.c_str(), &width, &height, 0, soilFormat);
 	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, type, img);
 	SOIL_free_image_data(img);
 
