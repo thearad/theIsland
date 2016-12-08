@@ -205,6 +205,8 @@ void Window::display_callback(GLFWwindow* window)
 	/*FOR TESTING SHADOW MAP*/
 	if (showMap) {
 		glViewport(width / 2, 0, width / 2, height);
+
+		//added this.
 		P = glm::perspective(camera.Zoom, (float)(width / 2) / (float)height, 0.1f, 1000.0f);
 
 		//staticView = V;
