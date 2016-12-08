@@ -369,8 +369,9 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 			heightmap->refresh("../terrain/terrain.ppm", 20.f);
 			break;
 		case GLFW_KEY_M:
-			if(showMap)
-				glfwDestroyWindow(map);
+			if (showMap) {
+				glfwSetWindowSize(window, width/ 2, height);
+			}
 			first = true;
 			showMap = !showMap;
 			
