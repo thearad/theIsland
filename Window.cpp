@@ -204,17 +204,15 @@ void Window::display_callback(GLFWwindow* window)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	/*FOR TESTING SHADOW MAP*/
 	if (showMap) {
+		glViewport(width / 2, 0, width / 2, height);
+		P = glm::perspective(camera.Zoom, (float)(width / 2) / (float)height, 0.1f, 1000.0f);
+
 		//staticView = V;
-		if (first) {
-			glfwSetWindowSize(window, width*2, height);
-			first = false;
-		}
 		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glDisable(GL_COMPARE_R_TO_TEXTURE);
 		
 		glUseProgram(quad_programID);
 		
-		glViewport(width/2, 0, width/2, height);
 		// Bind our texture in Texture Unit 0
 		glActiveTexture(GL_TEXTURE8);
 		glBindTexture(GL_TEXTURE_2D, dLightShadow->depth);
@@ -371,6 +369,9 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		case GLFW_KEY_M:
 			if (showMap) {
 				glfwSetWindowSize(window, width/ 2, height);
+			}
+			else {
+				glfwSetWindowSize(window, width * 2, height);
 			}
 			first = true;
 			showMap = !showMap;
