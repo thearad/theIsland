@@ -44,6 +44,7 @@ void main()
 {    
     float range_cutoffs[] = float [] (-10.f,-0.1f, 1.f, 2.5f, 5.f, 20.f);
     
+	
 	float weight[5] = float[] (0.227027, 0.1945946, 0.1216216, 0.054054, 0.016216);
 
 	// Shadows------------------------------------------------------
@@ -67,7 +68,14 @@ void main()
     // Textures------------------------------------------------------
     vec4 texColor;
 
-    if (FragPos.y <= range_cutoffs[1]) {
+  /* if (FragPos.y <= range_cutoffs[1]) {
+        float range = range_cutoffs[1] - range_cutoffs[0];
+        float fraction = (FragPos.y - range_cutoffs[0])/range;
+        texColor = vec4(texture(texSampler1, TexCoord).xyz, 1.0f);
+		ambient = vec3(0.1,0.1,0.1) * vec3(texColor);
+        color = texColor;
+    }*/
+	if (FragPos.y <= range_cutoffs[1]) {
         float range = range_cutoffs[1] - range_cutoffs[0];
         float fraction = (FragPos.y - range_cutoffs[0])/range;
         texColor = texture(texSampler0, TexCoord)*((1-fraction)) + texture(texSampler1, TexCoord)*(fraction);
@@ -110,8 +118,8 @@ void main()
         color = vec4(texColor.xyz, 1.0f);
     }
 	if(isInWater == 0){
-		color = vec4((ambient + ((Visibility+visibility)/2)*texColor.xyz* lightColor* lightPower), 1.0f); //+  ((Visibility+visibility)/2)*specular* lightColor* lightPower* pow(cosAlpha, 5)), 1.0f);
-	} 
+	color = vec4((ambient + ((Visibility+visibility)/2)*texColor.xyz* lightColor* lightPower), 1.0f); //+  ((Visibility+visibility)/2)*specular* lightColor* lightPower* pow(cosAlpha, 5)), 1.0f);
+	}
 	if(isSphere == 1){
 		vec3 result = vec3(1,1,0.5) * weight[0]; // current fragment's contribution
         for(int i = 1; i < 5; ++i)

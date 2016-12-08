@@ -26,7 +26,7 @@ ParticleManager* p_mgr;
 GLint particleShaderProgram;
 bool renderParticles = true;
 
-bool showMap = false, first = false;
+bool showMap = false, first = false, showSun = false;
 
 // On some systems you need to change this to the absolute path
 #define SHADER_PATH "../shaders/"
@@ -201,20 +201,21 @@ glm::vec4 reflect_clip = glm::vec4(0.f, 1.f, 0.f, -0.01f);
 void Window::display_callback(GLFWwindow* window)
 {
 	shadowPass();
+	glm::mat4 Model;
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	/*FOR TESTING SHADOW MAP*/
 	if (showMap) {
+		glViewport(width / 2, 0, width / 2, height);
+
+		//added this.
+		P = glm::perspective(camera.Zoom, (float)(width / 2) / (float)height, 0.1f, 1000.0f);
+
 		//staticView = V;
-		if (first) {
-			glfwSetWindowSize(window, width*2, height);
-			first = false;
-		}
 		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glDisable(GL_COMPARE_R_TO_TEXTURE);
 		
 		glUseProgram(quad_programID);
 		
-		glViewport(width/2, 0, width/2, height);
 		// Bind our texture in Texture Unit 0
 		glActiveTexture(GL_TEXTURE8);
 		glBindTexture(GL_TEXTURE_2D, dLightShadow->depth);
@@ -288,11 +289,11 @@ void Window::display_callback(GLFWwindow* window)
 	
 	glUseProgram(particleShaderProgram);
 	p_mgr->render(camera);
-
-	glUseProgram(shadowmapShaderProgram);
-	glm::mat4 Model = glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3(0.5, 0.5, 0.5)), glm::vec3(3 * glm::vec3(staticView* glm::vec4(lightInvDir, 0)).x, 3 * glm::vec3(staticView* glm::vec4(lightInvDir, 0)).y, glm::vec3(staticView* glm::vec4(lightInvDir, 0)).z + 1));//(staticView * glm::vec4(, 0.0)
-	sphere->draw(Model, shadowmapShaderProgram);
-	
+	if (showSun) {
+		glUseProgram(shadowmapShaderProgram);
+		Model = glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3(0.5, 0.5, 0.5)), glm::vec3(3 * glm::vec3(staticView* glm::vec4(lightInvDir, 0)).x, 3 * glm::vec3(staticView* glm::vec4(lightInvDir, 0)).y, glm::vec3(staticView* glm::vec4(lightInvDir, 0)).z + 1));//(staticView * glm::vec4(, 0.0)
+		sphere->draw(Model, shadowmapShaderProgram);
+	}
 	camera.Position.y += dist;
 	camera.Pitch *= -1;
 	camera.updateCameraVectors();
@@ -320,8 +321,10 @@ void Window::display_callback(GLFWwindow* window)
 	glUniform3fv(glGetUniformLocation(shadowmapShaderProgram, "lightInvDir"), 1, &lightInvDir[0]);
 	glUniform4f(glGetUniformLocation(shadowmapShaderProgram, "clippingPlane"), 0, 0, 0, 0);
 	glUniformMatrix4fv(glGetUniformLocation(shadowmapShaderProgram, "staticview"), 1, GL_FALSE, &staticView[0][0]);
-	Model = glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3(0.5,0.5,0.5)),glm::vec3(4*glm::vec3(staticView* glm::vec4(lightInvDir, 0)).x, 4*glm::vec3(staticView* glm::vec4(lightInvDir, 0)).y, glm::vec3(staticView* glm::vec4(lightInvDir, 0)).z));//(staticView * glm::vec4(, 0.0)
-	sphere->draw(Model, shadowmapShaderProgram);
+	if (showSun) {
+		Model = glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3(0.5, 0.5, 0.5)), glm::vec3(4 * glm::vec3(staticView* glm::vec4(lightInvDir, 0)).x, 4 * glm::vec3(staticView* glm::vec4(lightInvDir, 0)).y, glm::vec3(staticView* glm::vec4(lightInvDir, 0)).z));//(staticView * glm::vec4(, 0.0)
+		sphere->draw(Model, shadowmapShaderProgram);
+	}
 	heightmap->draw(shadowmapShaderProgram);
 	//render_scene();
 	glUseProgram(particleShaderProgram);
@@ -372,11 +375,18 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 			if (showMap) {
 				glfwSetWindowSize(window, width/ 2, height);
 			}
+			else {
+				glfwSetWindowSize(window, width * 2, height);
+			}
 			first = true;
 			showMap = !showMap;
 			
 			break;
+		case GLFW_KEY_N:
+			showSun = !showSun;
+		break;
 		}
+		
 		
 		if (mods == GLFW_MOD_ALT) {
 			escape_camera = !escape_camera;
