@@ -256,16 +256,20 @@ void Window::display_callback(GLFWwindow* window)
 		water->bindFrameBuffer(Water::REFRACTION);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		glUniform4f(glGetUniformLocation(heightmapShaderProgram, "clippingPlane"), refract_clip.x, refract_clip.y, refract_clip.z, refract_clip.w);
+		glUniform4f(glGetUniformLocation(shadowmapShaderProgram, "clippingPlane"), refract_clip.x, refract_clip.y, refract_clip.z, refract_clip.w);
 		glUniform4f(glGetUniformLocation(skyboxShaderProgram, "clippingPlane"), refract_clip.x, refract_clip.y, refract_clip.z, refract_clip.w);
 
-		render_scene();
+		glUseProgram(skyboxShaderProgram);
+		skybox->draw(skyboxShaderProgram, staticView);
+
+		glUseProgram(shadowmapShaderProgram);
+		heightmap->draw(shadowmapShaderProgram);
 	}
 	//SECOND PASS: SAVE TO WATER REFLECTION FBO------------------------------------------------------------------
 	water->bindFrameBuffer(Water::REFLECTION);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glUniform4f(glGetUniformLocation(heightmapShaderProgram, "clippingPlane"), reflect_clip.x, reflect_clip.y, reflect_clip.z, reflect_clip.w);
+	glUniform4f(glGetUniformLocation(shadowmapShaderProgram, "clippingPlane"), reflect_clip.x, reflect_clip.y, reflect_clip.z, reflect_clip.w);
 	glUniform4f(glGetUniformLocation(skyboxShaderProgram, "clippingPlane"), reflect_clip.x, reflect_clip.y, reflect_clip.z, reflect_clip.w);
 
 	float dist = 2 * camera.Position.y - 0.01f;
@@ -274,7 +278,14 @@ void Window::display_callback(GLFWwindow* window)
 	camera.updateCameraVectors();
 	V = camera.GetViewMatrix();
 
-	render_scene();
+	
+	//render_scene();
+	glUseProgram(skyboxShaderProgram);
+	skybox->draw(skyboxShaderProgram, staticView);
+
+	glUseProgram(shadowmapShaderProgram);
+	heightmap->draw(shadowmapShaderProgram);
+	
 	glUseProgram(particleShaderProgram);
 	p_mgr->render(camera);
 
@@ -302,8 +313,6 @@ void Window::display_callback(GLFWwindow* window)
 	skybox->draw(skyboxShaderProgram, staticView);
 
 	glUseProgram(shadowmapShaderProgram);
-	if (showMap)
-		glViewport(0, 0, width/2, height);
 	glActiveTexture(GL_TEXTURE9); //switches texture bind location to GL_TEXTURE(0+i)
 	glBindTexture(GL_TEXTURE_2D, dLightShadow->depth); //bind texture to active location
 	glUniform1i(glGetUniformLocation(shadowmapShaderProgram, "shadowMap"), 9); //sets uniform sampler2D texSampleri's texture bind loc.
@@ -319,8 +328,6 @@ void Window::display_callback(GLFWwindow* window)
 	p_mgr->render(camera);
 
 	glUseProgram(waterShaderProgram);
-	if (showMap)
-		glViewport(0, 0, width/2, height);
 	glUniform3f(glGetUniformLocation(waterShaderProgram, "camera_Position"), camera.Position.x, camera.Position.y, camera.Position.z);
 	water->draw(waterShaderProgram);
 	
