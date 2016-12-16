@@ -1,41 +1,53 @@
 #include "window.h"
 
+// On some systems you need to change this to the absolute path
+#define SHADER_PATH "../shaders/"
+#define SKYBOX_FACE_DIR "../skybox/"
+#define TERRAIN_PATH "../terrain/"
+
 const char* window_title = "Island";
 
+//Renderable modules
 SkyBox * skybox;
 HeightMap* heightmap;
 Water* water;
 ShadowMap * shadowmap;
 Sphere * sphere;
 GLFWwindow * map;
-glm::mat4 depthMVP;
-glm::mat4 staticView;
+ParticleManager * particleManager;
+ShadowMapDebugger * tester;
 
+//Camera
+Camera camera(glm::vec3(0.0f, 5.0f, 50.0f));
+//Variables to keep track camera movement
+bool leftButtonDown;
+bool firstMouseCallback;
+bool escape_camera = false;
+bool keys[1024];
+glm::vec3 lastPoint;
+
+//TimeKeeping
+GLfloat deltaTime = 0.0f, lastFrame = 0.0f;
+
+//Shader programs
 GLuint heightmapShaderProgram;
 GLuint skyboxShaderProgram;
 GLuint normalsShaderProgram;
 GLuint waterShaderProgram;
 GLuint depthShaderProgram;
 GLuint shadowmapShaderProgram;
-GLuint quad_programID;
-GLuint quad_vertexbuffer;
-GLuint texID;
+GLuint shadowmapDebuggerShaderProgram;
+GLuint particleShaderProgram;
 
-/*Adding ParticleManager variables*/
-ParticleManager* particleManager;
-GLint particleShaderProgram;
+//Booleans to determine what to show/not show
 bool renderParticles = true;
+bool showMap = false;
+bool showSun = false;
 
-bool showMap = false, first = false, showSun = false;
-
-// On some systems you need to change this to the absolute path
-#define SHADER_PATH "../shaders/"
-#define SKYBOX_FACE_DIR "../skybox/"
-
+//ShadowMapping variables
 glm::vec3 lightInvDir = glm::vec3(15, 10, 2);
-Camera camera(glm::vec3(0.0f, 5.0f, 50.0f));
-bool keys[1024];
-GLfloat deltaTime = 0.0f, lastFrame = 0.0f;
+glm::mat4 depthMVP;
+glm::mat4 staticView;
 glm::mat4 depthBiasMVP;
 glm::mat4 biasMatrix(
 	0.5, 0.0, 0.0, 0.0,
@@ -44,17 +56,16 @@ glm::mat4 biasMatrix(
 	0.5, 0.5, 0.5, 1.0
 );
 
+//Water reflection/refraction variables
+glm::vec4 refract_clip = glm::vec4(0.f, -1.f, 0.f, 0.01f);
+glm::vec4 reflect_clip = glm::vec4(0.f, 1.f, 0.f, -0.01f);
+
+//Window Variables
 int Window::width;
 int Window::height;
-
 glm::mat4 Window::P;
 glm::mat4 Window::V;
 
-bool Window::lbutton_down;
-bool Window::first_time;
-glm::vec3 Window::lastPoint;
-
-ShadowMapDebugger* tester;
 void Window::initialize_objects()
 {
 	// Load the shader program. Make sure you have the correct filepath up top
@@ -62,12 +73,11 @@ void Window::initialize_objects()
 	skyboxShaderProgram = LoadShaders(SHADER_PATH "skybox.vert", SHADER_PATH "skybox.frag");
 	normalsShaderProgram = LoadShaders(SHADER_PATH "normals.vert", SHADER_PATH "normals.frag", SHADER_PATH "normals.gs");
 	waterShaderProgram = LoadShaders(SHADER_PATH "water.vert", SHADER_PATH "water.frag");
-	
 	particleShaderProgram = LoadShaders(SHADER_PATH "particles.vert", SHADER_PATH "particles.frag");
-	
-	depthShaderProgram = LoadShaders("depth.vert", "depth.frag");
-	shadowmapShaderProgram = LoadShaders("shadowMap.vert", "shadowMap.frag");
-	
+	depthShaderProgram = LoadShaders(SHADER_PATH "depth.vert", SHADER_PATH "depth.frag");
+	shadowmapShaderProgram = LoadShaders(SHADER_PATH "shadowMap.vert", SHADER_PATH "shadowMap.frag");
+	shadowmapDebuggerShaderProgram = LoadShaders(SHADER_PATH "pass.vert", SHADER_PATH "pass.frag");
+
 	//Create renderable objects
 	water = new Water(200, 200);
 	sphere = new Sphere();
@@ -78,34 +88,14 @@ void Window::initialize_objects()
 	skybox = new SkyBox(faces);
 	heightmap = new HeightMap(200, 200);
 	particleManager = new ParticleManager(particleShaderProgram);
-
-	//ShadowMap logic with help from: http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-16-shadow-mapping/
 	shadowmap = new ShadowMap(1280, 960);
+
+	//Initialize shadowmap variables src: http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-16-shadow-mapping/
 	glm::mat4 depthViewMatrix, depthProjectionMatrix;
 	depthProjectionMatrix = glm::ortho<float>(-50, 50, -50, 50, -50, 100);
 	depthViewMatrix = glm::lookAt(lightInvDir, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));//lightInvDir is freaking out
-	
 	depthMVP = depthProjectionMatrix * depthViewMatrix * glm::mat4(1.0f);
-
 	staticView = Window::V;
-
-	static const GLfloat g_quad_vertex_buffer_data[] = {
-		-640.0f, -480.0f, 0.0f,
-		640.0f, -480.0f, 0.0f,
-		-640.0f,  480.0f, 0.0f,
-		-640.0f,  480.0f, 0.0f,
-		640.0f, -480.0f, 0.0f,
-		640.0f,  480.0f, 0.0f,
-	};
-
-	glGenBuffers(1, &quad_vertexbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data, GL_STATIC_DRAW);
-
-	// Create and compile our GLSL program from the shaders
-	quad_programID = LoadShaders("pass.vert", "pass.frag");
-	tester = new ShadowMapDebugger();
-
 }
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
@@ -126,14 +116,14 @@ GLFWwindow* Window::create_window(int width, int height)
 	// 4x antialiasing
 	glfwWindowHint(GLFW_SAMPLES, 4);
 
-#ifdef __APPLE__ // Because Apple hates comforming to standards
-	// Ensure that minimum OpenGL version is 3.3
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	// Enable forward compatibility and allow a modern OpenGL context
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
+	#ifdef __APPLE__ // Because Apple hates comforming to standards
+		// Ensure that minimum OpenGL version is 3.3
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+		// Enable forward compatibility and allow a modern OpenGL context
+		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+	#endif
 
 	// Create the GLFW window
 	GLFWwindow* window = glfwCreateWindow(width, height, window_title, NULL, NULL);
@@ -181,15 +171,6 @@ void Window::idle_callback()
 	poll_movement();
 }
 
-//renders objects on the scene that require no multirendering
-void Window::renderSceneObjects() {
-	glUseProgram(skyboxShaderProgram);
-	skybox->draw(skyboxShaderProgram, staticView);
-
-	glUseProgram(shadowmapShaderProgram);
-	heightmap->draw(shadowmapShaderProgram);
-}
-
 //polls for WASD movements
 void Window::poll_movement() {
 	GLfloat currentFrame = glfwGetTime();
@@ -200,19 +181,18 @@ void Window::poll_movement() {
 	P = glm::perspective(camera.Zoom, (float)width / (float)height, 0.1f, 1000.0f);
 }
 
-glm::vec4 refract_clip = glm::vec4(0.f, -1.f, 0.f, 0.01f);
-glm::vec4 reflect_clip = glm::vec4(0.f, 1.f, 0.f, -0.01f);
 void Window::display_callback(GLFWwindow* window)
 {
 	renderToShadowDepthBuffer();
 
+	/*BUG: Can't stick shadowDebugger into renderToScreen() for some reason*/
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	if (showMap) {
 		glViewport(width / 2, 0, width / 2, height);
 		P = glm::perspective(camera.Zoom, (float)(width / 2) / (float)height, 0.1f, 1000.0f);
 
-		glUseProgram(quad_programID);
-		tester->draw(quad_programID, shadowmap->depth);
+		glUseProgram(shadowmapDebuggerShaderProgram);
+		shadowmap->debug_draw(shadowmapDebuggerShaderProgram);
 	}
 
 	renderToWaterRefractionBuffer();
@@ -231,6 +211,16 @@ void Window::display_callback(GLFWwindow* window)
 	glfwSwapBuffers(window);
 }
 
+//renders objects onto the scene plainly. (Use this for render-to-texture)
+void Window::renderSceneObjects() {
+	glUseProgram(skyboxShaderProgram);
+	skybox->draw(skyboxShaderProgram, staticView);
+
+	glUseProgram(shadowmapShaderProgram);
+	heightmap->draw(shadowmapShaderProgram);
+}
+
+//renders to the shadow depth buffer
 void Window::renderToShadowDepthBuffer() {
 	shadowmap->bind();
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
@@ -244,15 +234,16 @@ void Window::renderToShadowDepthBuffer() {
 	GLuint depthMatrixID = glGetUniformLocation(depthShaderProgram, "depthMVP");
 	glUniformMatrix4fv(depthMatrixID, 1, GL_FALSE, &depthMVP[0][0]);
 
-	//skybox->draw(depthShaderProgram);
+	//**put object->draw() to render to depth buffer here**
 	heightmap->quickDraw();
 
 	shadowmap->unbind();
 	glDisable(GL_CULL_FACE);
 
-	depthBiasMVP = biasMatrix*depthMVP;//biasMatrix*
+	depthBiasMVP = biasMatrix*depthMVP;
 }
 
+//renders to water refraction buffer
 void Window::renderToWaterRefractionBuffer() {
 	glUniform4f(glGetUniformLocation(shadowmapShaderProgram, "clippingPlane"), refract_clip.x, refract_clip.y, refract_clip.z, refract_clip.w);
 	glUniform4f(glGetUniformLocation(skyboxShaderProgram, "clippingPlane"), refract_clip.x, refract_clip.y, refract_clip.z, refract_clip.w);
@@ -262,6 +253,7 @@ void Window::renderToWaterRefractionBuffer() {
 	water->unbindFrameBuffer();
 }
 
+//renders to water reflection buffer
 void Window::renderToWaterReflectionBuffer() {
 	water->bindFrameBuffer(Water::REFLECTION);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -293,6 +285,7 @@ void Window::renderToWaterReflectionBuffer() {
 	water->unbindFrameBuffer();
 }
 
+//renders to the screen
 void Window::renderToScreen() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -326,10 +319,8 @@ void Window::renderToScreen() {
 	water->draw(waterShaderProgram);
 }
 
-bool escape_camera = false;
 void Window::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-
 	if (action == GLFW_PRESS)
 	{
 		switch (key) {
@@ -349,7 +340,7 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 			heightmap->refresh(200, 200, 20.f);
 			break;
 		case GLFW_KEY_L:
-			heightmap->refresh("../terrain/terrain.ppm", 20.f);
+			heightmap->refresh(TERRAIN_PATH "terrain.ppm", 20.f);
 			break;
 		case GLFW_KEY_M:
 			if (showMap) {
@@ -358,15 +349,12 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 			else {
 				glfwSetWindowSize(window, width * 2, height);
 			}
-			first = true;
 			showMap = !showMap;
-			
 			break;
 		case GLFW_KEY_N:
 			showSun = !showSun;
 		break;
 		}
-		
 		
 		if (mods == GLFW_MOD_ALT) {
 			escape_camera = !escape_camera;
@@ -384,15 +372,16 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		}
 	}
 }
+
 void Window::mouse_callback(GLFWwindow* window, int button, int action, int mods)
 {
 	if (button == GLFW_MOUSE_BUTTON_LEFT) {
 		if (GLFW_PRESS == action) {
-			lbutton_down = true;
+			leftButtonDown = true;
 		}
 		else if (GLFW_RELEASE == action) {
-			lbutton_down = false;
-			first_time = true;
+			leftButtonDown = false;
+			firstMouseCallback = true;
 		}
 	}
 }
@@ -411,11 +400,11 @@ void Window::Do_Movement()
 }
 void Window::cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
 {
-	if (first_time)
+	if (firstMouseCallback)
 	{
 		lastPoint.x = xpos;
 		lastPoint.y = ypos;
-		first_time = false;
+		firstMouseCallback = false;
 	}
 
 	GLfloat xoffset = xpos - lastPoint.x;

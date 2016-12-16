@@ -5,16 +5,9 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
-    </Filter>
     <Filter Include="Resource Files">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
-    <Filter Include="Shaders">
-      <UniqueIdentifier>{2ade7ffc-a012-4ad3-9714-17304937fd3e}</UniqueIdentifier>
     </Filter>
     <Filter Include="Resource Files\skybox">
       <UniqueIdentifier>{99c8e3c4-c9d5-4b36-b3f0-dcb88562178a}</UniqueIdentifier>
@@ -22,56 +15,21 @@
     <Filter Include="Resource Files\heightmap">
       <UniqueIdentifier>{43a08d5a-b8ed-4a41-aadc-4d77fb37027f}</UniqueIdentifier>
     </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\Cube.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Window.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\shader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\SkyBox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\PerlinNoise.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\HeightMap.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\util.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Texture.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Water.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Camera.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ShadowMap.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Sphere.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Particle.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ParticleManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ShadowMapDebugger.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{6b2ef83d-d4cd-40fc-884b-687a54ffa216}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\particles">
+      <UniqueIdentifier>{5dc8da0b-d63d-47b4-a720-671c03a25c32}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\terrain">
+      <UniqueIdentifier>{c7240000-1787-47a1-add0-7c681dd48098}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\water">
+      <UniqueIdentifier>{db4c5cf2-1af2-42aa-b068-7a3417fb0fb8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{4e3514c9-1735-4265-a08f-4eb8927b836e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\main.cpp">
@@ -107,61 +65,79 @@
     <ClCompile Include="..\Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ShadowMap.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Sphere.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\Particle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\ParticleManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ShadowMapDebugger.cpp">
+    <ClCompile Include="..\ShadowMapDebugger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ShadowMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Sphere.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="..\shader.frag">
+    <None Include="..\terrain\SanDiegoTerrain.ppm">
+      <Filter>Resource Files\terrain</Filter>
+    </None>
+    <None Include="..\terrain\terrain.ppm">
+      <Filter>Resource Files\terrain</Filter>
+    </None>
+    <None Include="..\shaders\depth.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\shader.vert">
+    <None Include="..\shaders\depth.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\skyboxShader.frag">
+    <None Include="..\shaders\heightmap.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\skyboxShader.vert">
+    <None Include="..\shaders\heightmap.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\normals.frag">
+    <None Include="..\shaders\normals.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\normals.gs">
+    <None Include="..\shaders\normals.gs">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\normals.vert">
+    <None Include="..\shaders\normals.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="depth.vert">
+    <None Include="..\shaders\particles.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="depth.frag">
+    <None Include="..\shaders\particles.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="pass.vert">
+    <None Include="..\shaders\pass.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="pass.frag">
+    <None Include="..\shaders\pass.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="shadowMap.vert">
+    <None Include="..\shaders\shadowMap.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="shadowMap.frag">
+    <None Include="..\shaders\shadowMap.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\shaders\skybox.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\shaders\skybox.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\shaders\water.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\shaders\water.vert">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
@@ -211,5 +187,70 @@
     <Image Include="..\textures\snow.jpg">
       <Filter>Resource Files\heightmap</Filter>
     </Image>
+    <Image Include="..\particles\firefly.png">
+      <Filter>Resource Files\particles</Filter>
+    </Image>
+    <Image Include="..\particles\firefly_green.png">
+      <Filter>Resource Files\particles</Filter>
+    </Image>
+    <Image Include="..\particles\star.png">
+      <Filter>Resource Files\particles</Filter>
+    </Image>
+    <Image Include="..\water\waterDUDV.1.png">
+      <Filter>Resource Files\water</Filter>
+    </Image>
+    <Image Include="..\water\waterDUDV.png">
+      <Filter>Resource Files\water</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Cube.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\HeightMap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\main.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Particle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ParticleManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\PerlinNoise.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\shader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ShadowMap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ShadowMapDebugger.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SkyBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Sphere.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Texture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\util.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Water.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Window.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
