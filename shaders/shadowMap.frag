@@ -57,76 +57,63 @@ void main()
 	// Fixed bias, or...
 	float bias = 0.005;
 
-	// ...variable bias
-	// float bias = 0.005*tan(acos(cosTheta));
-	// bias = clamp(bias, 0,0.01);
-
 	for (int i=0;i<4;i++){
 		visibility -= 0.2*(1.0-texture( shadowMap, vec3(shadowCoord.xy + poissonDisk[i]/700.0,  (shadowCoord.z-bias)/shadowCoord.w) ));
 	}
 
     // Textures------------------------------------------------------
-    vec4 texColor;
-  /* if (FragPos.y <= range_cutoffs[1]) {
-        float range = range_cutoffs[1] - range_cutoffs[0];
-        float fraction = (FragPos.y - range_cutoffs[0])/range;
-        texColor = vec4(texture(texSampler1, TexCoord).xyz, 1.0f);
+	vec4 texColor;
+	if (FragPos.y <= range_cutoffs[1]) {
+		float range = range_cutoffs[1] - range_cutoffs[0];
+		float fraction = (FragPos.y - range_cutoffs[0])/range;
+		texColor = vec4(texture(texSampler1, TexCoord).xyz, 1.0f);
 		ambient = vec3(0.1,0.1,0.1) * vec3(texColor);
-        color = texColor;
-    }*/
-   if (FragPos.y <= range_cutoffs[1]) {
-        float range = range_cutoffs[1] - range_cutoffs[0];
-        float fraction = (FragPos.y - range_cutoffs[0])/range;
-        texColor = texture(texSampler0, TexCoord)*((1-fraction)) + texture(texSampler1, TexCoord)*(fraction);
-        isInWater = 1;
 		color = vec4(texColor.xyz, 1.0f);
-    }
-    else if (FragPos.y <= range_cutoffs[2]) {
-        float range = range_cutoffs[2] - range_cutoffs[1];
-        float fraction = (FragPos.y - range_cutoffs[1])/range;
-        texColor = texture(texSampler1, TexCoord)*(1-fraction) + texture(texSampler2, TexCoord)*fraction;
-		ambient = vec3(0.1,0.1,0.1) * vec3(texColor);
-        color = vec4(texColor.xyz, 1.0f);
-    }
-    else if (FragPos.y <= range_cutoffs[3]) {
-        float range = range_cutoffs[3] - range_cutoffs[2];
-        float fraction = (FragPos.y - range_cutoffs[2])/range;
-        texColor = texture(texSampler2, TexCoord)*(1-fraction) + texture(texSampler3, TexCoord)*fraction;
-		ambient = vec3(0.1,0.1,0.1) * texColor.xyz;
-        color = vec4(texColor.xyz, 1.0f);
-    }
-    else if (FragPos.y <= range_cutoffs[4]) {
-        float range = range_cutoffs[4] - range_cutoffs[3];
-        float fraction = (FragPos.y - range_cutoffs[3])/range;
-        texColor = texture(texSampler3, TexCoord)*(1-fraction) + texture(texSampler4, TexCoord)*fraction;
-		ambient = vec3(0.1,0.1,0.1) * texColor.xyz;
-        color = vec4(texColor.xyz, 1.0f);
-
-    }
-    else if (FragPos.y <= range_cutoffs[5]) {
-        float range = range_cutoffs[5] - range_cutoffs[4];
-        float fraction = (FragPos.y - range_cutoffs[4])/range;
-        texColor = texture(texSampler4, TexCoord)*(1-fraction) + texture(texSampler5, TexCoord)*fraction;
-		ambient = vec3(0.1,0.1,0.1) * texColor.xyz;
-        color = vec4(texColor.xyz, 1.0f);
-    }
-    else {
-        texColor = texture(texSampler5, TexCoord);
-		ambient = vec3(0.1,0.1,0.1) * texColor.xyz;
-        color = vec4(texColor.xyz, 1.0f);
-    }
-	if(isInWater == 0){
-	color = vec4((ambient + ((Visibility+visibility)/2)*texColor.xyz* lightColor* lightPower), 1.0f); //+  ((Visibility+visibility)/2)*specular* lightColor* lightPower* pow(cosAlpha, 5)), 1.0f);
 	}
-	//color = vec4((ambient + ((Visibility+visibility)/2)*texColor.xyz* lightColor* lightPower), 1.0f); //+  ((Visibility+visibility)/2)*specular* lightColor* lightPower* pow(cosAlpha, 5)), 1.0f);
+	else if (FragPos.y <= range_cutoffs[2]) {
+		float range = range_cutoffs[2] - range_cutoffs[1];
+		float fraction = (FragPos.y - range_cutoffs[1])/range;
+		texColor = texture(texSampler1, TexCoord)*(1-fraction) + texture(texSampler2, TexCoord)*fraction;
+		ambient = vec3(0.1,0.1,0.1) * vec3(texColor);
+		color = vec4(texColor.xyz, 1.0f);
+	}
+	else if (FragPos.y <= range_cutoffs[3]) {
+		float range = range_cutoffs[3] - range_cutoffs[2];
+		float fraction = (FragPos.y - range_cutoffs[2])/range;
+		texColor = texture(texSampler2, TexCoord)*(1-fraction) + texture(texSampler3, TexCoord)*fraction;
+		ambient = vec3(0.1,0.1,0.1) * texColor.xyz;
+		color = vec4(texColor.xyz, 1.0f);
+	}
+	else if (FragPos.y <= range_cutoffs[4]) {
+		float range = range_cutoffs[4] - range_cutoffs[3];
+		float fraction = (FragPos.y - range_cutoffs[3])/range;
+		texColor = texture(texSampler3, TexCoord)*(1-fraction) + texture(texSampler4, TexCoord)*fraction;
+		ambient = vec3(0.1,0.1,0.1) * texColor.xyz;
+		color = vec4(texColor.xyz, 1.0f);
+
+	}
+	else if (FragPos.y <= range_cutoffs[5]) {
+		float range = range_cutoffs[5] - range_cutoffs[4];
+		float fraction = (FragPos.y - range_cutoffs[4])/range;
+		texColor = texture(texSampler4, TexCoord)*(1-fraction) + texture(texSampler5, TexCoord)*fraction;
+		ambient = vec3(0.1,0.1,0.1) * texColor.xyz;
+		color = vec4(texColor.xyz, 1.0f);
+	}
+	else {
+		texColor = texture(texSampler5, TexCoord);
+		ambient = vec3(0.1,0.1,0.1) * texColor.xyz;
+		color = vec4(texColor.xyz, 1.0f);
+	}
+	color = vec4((ambient + ((Visibility+visibility)/2)*texColor.xyz* lightColor* lightPower), 1.0f); //+  ((Visibility+visibility)/2)*specular* lightColor* lightPower* pow(cosAlpha, 5)), 1.0f);
+	color = mix(vec4(0.4, 0.4, 0.4, 0.0), color, Visibility);
 
 	if(isSphere == 1){
 		vec3 result = vec3(1,1,0.5) * weight[0]; // current fragment's contribution
-        for(int i = 1; i < 5; ++i)
-        {
-            result += (vec3(1,1,0.5)+ vec3(i,i, 0.0)) * weight[i];
-            result += (vec3(1,1,0.5)- vec3(i,i, 0.0)) * weight[i];
-        }
+		for(int i = 1; i < 5; ++i)
+		{
+			result += (vec3(1,1,0.5)+ vec3(i,i, 0.0)) * weight[i];
+			result += (vec3(1,1,0.5)- vec3(i,i, 0.0)) * weight[i];
+		}
 		color = vec4(result, 1.0);
 	}
 }

@@ -30,7 +30,7 @@ Water::Water(int width, int height) {
 	this->height = height;
 
 	//load wave texture
-	dudv = Texture("../water/waterDUDV.png").getID();
+	waterdudv = new Texture(WATER_PATH "waterDUDV.png");
 
 	//initialize everything
 	init();
@@ -63,6 +63,21 @@ void Water::bindData() {
 	glBindVertexArray(0);
 }
 
+Water::~Water() {
+	delete(waterdudv);
+	delete(reflTexture);
+	delete(refractionTexture);
+	delete(refractionDepthTexture);
+
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &EBO);
+	
+	glDeleteFramebuffers(1, &reflectionFBO);
+	glDeleteRenderbuffers(1, &reflectionDBO);
+	glDeleteFramebuffers(1, &refractionFBO);
+}
+
 void Water::initFrameBuffers() {
 	//REFLECTIONS
 	glGenFramebuffers(1, &this->reflectionFBO);
@@ -70,9 +85,8 @@ void Water::initFrameBuffers() {
 	glDrawBuffer(GL_COLOR_ATTACHMENT0);
 	
 	//create reflection texture attachment for frame buffer
-	Texture reflTexture = Texture(REFLECTION_WIDTH, REFLECTION_HEIGHT);
-	this->reflectionTex = reflTexture.getID();
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, this->reflectionTex, 0);
+	reflTexture = new Texture(REFLECTION_WIDTH, REFLECTION_HEIGHT);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, reflTexture->getID(), 0);
 
 	//create depth buffer
 	glGenRenderbuffers(1, &this->reflectionDBO);
@@ -90,13 +104,11 @@ void Water::initFrameBuffers() {
 	glDrawBuffer(GL_COLOR_ATTACHMENT0);
 
 	//create refraction texture attachment and refraction depth texture attachment
-	Texture refractionTexture = Texture(REFRACTION_WIDTH, REFRACTION_HEIGHT);
-	this->refractionTex = refractionTexture.getID();
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, this->refractionTex, 0);
+	refractionTexture = new Texture(REFRACTION_WIDTH, REFRACTION_HEIGHT);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, refractionTexture->getID(), 0);
 
-	Texture refractionDepthTexture = Texture(REFRACTION_WIDTH, REFRACTION_HEIGHT, GL_DEPTH_COMPONENT32, GL_DEPTH_COMPONENT, GL_FLOAT);
-	this->refractionDTex = refractionDepthTexture.getID();
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, this->refractionDTex, 0);
+	refractionDepthTexture = new Texture(REFRACTION_WIDTH, REFRACTION_HEIGHT, GL_DEPTH_COMPONENT32, GL_DEPTH_COMPONENT, GL_FLOAT);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, refractionDepthTexture->getID(), 0);
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		std::cerr << "Water::initFrameBuffers - Failed to create refraction frame buffer with enum "<< glCheckFramebufferStatus(GL_FRAMEBUFFER) << std::endl;
@@ -161,13 +173,13 @@ void Water::loadShaderData(GLuint shaderProgram) {
 void Water::setActiveTextures() {
 	//Bind textures to be used to active texture locations
 	glActiveTexture(GL_TEXTURE0 + REFLECTION);
-	glBindTexture(GL_TEXTURE_2D, reflectionTex);
+	glBindTexture(GL_TEXTURE_2D, reflTexture->getID());
 
 	glActiveTexture(GL_TEXTURE0 + REFRACTION);
-	glBindTexture(GL_TEXTURE_2D, refractionTex);
+	glBindTexture(GL_TEXTURE_2D, refractionTexture->getID());
 
 	glActiveTexture(GL_TEXTURE0 + DUDV);
-	glBindTexture(GL_TEXTURE_2D, dudv);
+	glBindTexture(GL_TEXTURE_2D, waterdudv->getID());
 }
 
 void Water::unsetActiveTextures() {
@@ -181,7 +193,6 @@ void Water::unsetActiveTextures() {
 	glActiveTexture(GL_TEXTURE0 + DUDV);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
-
 
 void Water::draw(GLuint shaderProgram) {
 	glEnableVertexAttribArray(0);

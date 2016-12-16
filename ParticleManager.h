@@ -13,10 +13,12 @@
 #include "Particle.h"
 
 #define MAX_PARTICLES 1500
+#define PARTICLE_PATH "../particles/"
 
 using namespace util;
 
 struct ParticleTexture {
+	Texture* tex;
 	GLuint texId;
 	GLuint numRows;
 };

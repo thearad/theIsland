@@ -29,6 +29,7 @@ private:
 	GLuint cubemapTexture;
 public:
 	SkyBox(std::vector<const GLchar*> faces);
+	~SkyBox();
 
 	GLuint loadCubeMap(std::vector<const GLchar*> faces);
 	void draw(GLuint shaderProgram, glm::mat4 view);

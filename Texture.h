@@ -56,5 +56,7 @@ public:
 		}
 	);
 
+	~Texture();
+
 	GLuint getID();
 };

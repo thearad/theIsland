@@ -16,6 +16,11 @@
 using namespace util;
 class HeightMap {
 private:
+	std::string path = "../textures/";
+	std::vector<std::string> sTextureNames = {
+		"ocean.jpg", "sand.jpg", "grass_4.jpg", "grass_3.jpg", "grass_rock.jpg", "snow.jpg"
+	};
+
 	GLuint VAO, VBO_vert, VBO_norm, VBO_tex, EBO;
 	GLfloat ISLAND_SIZE = 20.f;
 	std::vector < glm::vec3 > vertices;
@@ -23,7 +28,7 @@ private:
 	std::vector < glm::vec3 > normals;
 	std::vector < glm::vec2 > texCoords;
 
-	std::vector <std::pair<Texture, std::string>> textures;
+	std::vector <std::pair<Texture*, std::string>> textures;
 
 	int width, height;
 
@@ -32,6 +37,7 @@ private:
 	void calcTexCoords();
 
 	void loadTextures();
+	void unloadTextures();
 	void init();
 
 	void loadVertices(char* filename, GLfloat island_size); //will load a PPM file
@@ -42,6 +48,7 @@ private:
 public:
 	HeightMap(char* filename, GLfloat island_size = 20.f);
 	HeightMap(int width, int height, GLfloat island_size = 20.f);
+	~HeightMap();
 
 	void draw(GLuint shaderProgram);
 	void drawNormals(GLuint shaderProgram);

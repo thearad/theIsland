@@ -15,6 +15,12 @@ SkyBox::SkyBox(std::vector<const GLchar*> faces) {
 	loadCubeMap(faces);
 }
 
+SkyBox::~SkyBox() {
+	glDeleteTextures(1, &cubemapTexture);
+	glDeleteVertexArrays(1, &skyboxVAO);
+	glDeleteBuffers(1, &skyboxVBO);
+}
+
 GLuint SkyBox::loadCubeMap(std::vector<const GLchar*> faces) {
 	GLuint textureID;
 	glGenTextures(1, &textureID);

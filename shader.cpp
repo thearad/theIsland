@@ -72,8 +72,6 @@ GLuint LoadShaders(const char * vertex_file_path, const char * fragment_file_pat
 			GeometryShaderStream.close();
 		}
 	}
-	std::cout << " code " << GeometryShaderCode << std::endl;
-
 	GLint Result = GL_FALSE;
 	int InfoLogLength;
 

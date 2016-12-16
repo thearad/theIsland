@@ -101,7 +101,19 @@ void Window::initialize_objects()
 // Treat this as a destructor function. Delete dynamically allocated memory here.
 void Window::clean_up()
 {
+	delete(water);
+	delete(heightmap);
+	delete(particleManager);
+	delete(shadowmap);
+
 	glDeleteProgram(heightmapShaderProgram);
+	glDeleteProgram(skyboxShaderProgram);
+	glDeleteProgram(normalsShaderProgram);
+	glDeleteProgram(waterShaderProgram);
+	glDeleteProgram(particleShaderProgram);
+	glDeleteProgram(depthShaderProgram);
+	glDeleteProgram(shadowmapShaderProgram);
+	glDeleteProgram(shadowmapDebuggerShaderProgram);
 }
 
 GLFWwindow* Window::create_window(int width, int height)

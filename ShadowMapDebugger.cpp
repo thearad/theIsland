@@ -5,6 +5,10 @@ ShadowMapDebugger::ShadowMapDebugger() {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data, GL_STATIC_DRAW);
 }
 
+ShadowMapDebugger::~ShadowMapDebugger() {
+	glDeleteBuffers(1, &quad_vertexbuffer);
+}
+
 void ShadowMapDebugger::draw(GLuint shaderProgram, GLuint depth_texture) {
 	glDisable(GL_COMPARE_R_TO_TEXTURE);
 

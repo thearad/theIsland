@@ -9,12 +9,17 @@ ParticleManager::ParticleManager(GLuint shaderProgram) {
 		std::make_pair(GL_TEXTURE_MAG_FILTER, GL_LINEAR)
 	};
 
-	texture.texId = Texture("../particles/firefly_green.png", GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, SOIL_LOAD_RGBA, texParams).getID();
+	texture.tex = new Texture(PARTICLE_PATH "firefly_green.png", GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, SOIL_LOAD_RGBA, texParams);
+	texture.texId = texture.tex->getID();
 	texture.numRows = 1;
-
 }
 
 ParticleManager::~ParticleManager() {
+	delete(texture.tex);
+
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &VBO_vert);
+	glDeleteBuffers(1, &VBO_models);
 }
 
 void ParticleManager::init() {
@@ -151,7 +156,6 @@ void ParticleManager::update() {
 
 void ParticleManager::addParticle(int x, int z) {
 
-	//16:39
 	float x_c = randFrom(0, x / 2);
 	if (rand() % 2 < 1) {
 		x_c = -x_c;
@@ -160,7 +164,6 @@ void ParticleManager::addParticle(int x, int z) {
 	if (rand() % 2 < 1) {
 		z_c = -z_c;
 	}
-	//std::cout << "Adding a particle x: " << x_c << " z: " << z_c << std::endl;
 
 	/*
 	TODO: weirdest bug...

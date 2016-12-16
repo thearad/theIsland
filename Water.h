@@ -11,6 +11,7 @@
 #define REFRACTION_WIDTH 1280
 #define REFRACTION_HEIGHT 720
 #define WAVE_SPEED 0.03
+#define WATER_PATH "../water/"
 
 class Water {
 private:
@@ -36,9 +37,9 @@ private:
 	void bindData();
 
 public:
-	GLuint reflectionFBO, reflectionTex, reflectionDBO;
-	GLuint refractionFBO, refractionTex, refractionDTex;
-	GLuint dudv;
+	GLuint reflectionFBO, reflectionDBO;
+	GLuint refractionFBO;
+	Texture *waterdudv, *reflTexture, *refractionTexture, *refractionDepthTexture;
 
 	float moveFactor = 0.f;
 
@@ -51,7 +52,6 @@ public:
 
 	void init();
 	void initFrameBuffers();
-	void initShaderData();
 
 	void bindFrameBuffer(int type);
 	void unbindFrameBuffer();

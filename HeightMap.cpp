@@ -16,6 +16,15 @@ HeightMap::HeightMap(int width, int height, GLfloat island_size) {
 	bindData();
 }
 
+HeightMap::~HeightMap() {
+	unloadTextures();
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &VBO_vert);
+	glDeleteBuffers(1, &VBO_norm);
+	glDeleteBuffers(1, &VBO_tex);
+	glDeleteBuffers(1, &EBO);
+}
+
 void HeightMap::init() {
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO_vert);
@@ -58,14 +67,16 @@ void HeightMap::bindData() {
 }
 
 void HeightMap::loadTextures() {
-	std::string path = "../textures/";
-	std::vector<std::string> sTextureNames = {
-		"ocean.jpg", "sand.jpg", "grass_4.jpg", "grass_3.jpg", "grass_rock.jpg", "snow.jpg" 
-	};
 	for (int i = 0; i < sTextureNames.size(); i++) {
 		textures.push_back(
-			std::make_pair(Texture(path + sTextureNames[i]), "texSampler" + std::to_string(i))
+			std::make_pair(new Texture(path + sTextureNames[i]), "texSampler" + std::to_string(i))
 		);
+	}
+}
+
+void HeightMap::unloadTextures() {
+	for (int i = 0; i < textures.size(); i++) {
+		delete(textures[i].first);
 	}
 }
 
@@ -73,6 +84,9 @@ void HeightMap::draw(GLuint shaderProgram) {
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	//Send misc. data
 	glm::mat4 model = glm::mat4(1.0);
@@ -83,7 +97,7 @@ void HeightMap::draw(GLuint shaderProgram) {
 
 	for (int i = 0; i < textures.size(); i++) {
 		glActiveTexture(GL_TEXTURE0 + i); //switches texture bind location to GL_TEXTURE(0+i)
-		glBindTexture(GL_TEXTURE_2D, textures[i].first.getID()); //bind texture to active location
+		glBindTexture(GL_TEXTURE_2D, textures[i].first->getID()); //bind texture to active location
 		glUniform1i(glGetUniformLocation(shaderProgram, textures[i].second.c_str()), i); //sets uniform sampler2D texSampleri's texture bind loc.
 	}
 
@@ -97,6 +111,8 @@ void HeightMap::draw(GLuint shaderProgram) {
 		glActiveTexture(GL_TEXTURE0 + i); //switches texture bind location to GL_TEXTURE(0+i)
 		glBindTexture(GL_TEXTURE_2D, 0); //bind texture to active location
 	}
+
+	glDisable(GL_BLEND);
 
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);

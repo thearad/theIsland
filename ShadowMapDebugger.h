@@ -23,6 +23,7 @@ private:
 	GLuint quad_vertexbuffer;
 public:
 	ShadowMapDebugger();
+	~ShadowMapDebugger();
 
 	void draw(GLuint shaderProgram, GLuint depth_texture);
 

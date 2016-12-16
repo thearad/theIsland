@@ -13,13 +13,16 @@ Texture::Texture(int width, int height, GLint internalFormat, GLenum format, GLe
 	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, type, NULL);
 
 	//Set texture parameters
-	//Set texture parameters
 	for (int i = 0; i < texParams.size(); i++) {
 		glTexParameteri(GL_TEXTURE_2D, texParams[i].first, texParams[i].second);
 	}
 
 	// Unbind texture
 	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+Texture::~Texture() {
+	glDeleteTextures(1, &id);
 }
 
 Texture::Texture(std::string path, GLint internalFormat, GLenum format, GLenum type, int soilFormat, std::vector<std::pair<GLenum, GLint>> texParams) {
