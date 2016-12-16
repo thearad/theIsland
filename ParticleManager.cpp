@@ -129,7 +129,7 @@ void ParticleManager::render(Camera camera) {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture.texId);
 	
-	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, particles.size());
+	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4,  particles.size());
 	
 	glBindTexture(GL_TEXTURE_2D, 0);
 

@@ -9,7 +9,7 @@ Particle::Particle(
 	this->rotation = rotation;
 	this->scale = scale;
 
-	this->prev_time = glfwGetTime();
+	this->prev_time = (float)glfwGetTime();
 }
 
 bool Particle::update() {
@@ -29,7 +29,7 @@ bool Particle::update() {
 	//return elapsed_time < life_length;
 
 
-	curr_time = glfwGetTime();
+	curr_time = (float)glfwGetTime();
 	float frame_time = curr_time - prev_time;
 	//velocity.y += -50.f /*in place of Player.GRAVITY*/ * gravity_effect * frame_time;
 	if (rand() % 80 < 1) {

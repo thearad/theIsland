@@ -48,7 +48,7 @@ void main()
 	float weight[5] = float[] (0.227027, 0.1945946, 0.1216216, 0.054054, 0.016216);
 
 	// Shadows------------------------------------------------------
-	vec3 ambient;
+	vec3 ambient = vec3(0,0,0);
 	float isInWater = 0;
 	vec3 lightColor = vec3(1,1,1);
 	float lightPower = 1.0f;

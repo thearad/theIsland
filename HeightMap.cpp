@@ -125,13 +125,13 @@ void HeightMap::loadVertices(char* filename, GLfloat island_size) {
 		std::cerr << "HeightMap::loadVertices failed - no data read from filename" << std::endl;
 		return;
 	}
-	float y_mid = height / 2;
-	float x_mid = width / 2;
+	float y_mid = (float)height / 2.f;
+	float x_mid = (float)width / 2.f;
 	float max_width = island_size;
 
 	int index_w = 0, index_h = 0;
-	for (int h = floor(-height / 2); h < floor(height / 2); h++) {
-		for (int w = floor(-width / 2); w < floor(width / 2); w++) {
+	for (int h = (int)floor(-height / 2); h < (int)floor(height / 2); h++) {
+		for (int w = (int)floor(-width / 2); w < (int)floor(width / 2); w++) {
 
 			float v_h = data[(index_h*width + index_w) * 3]/255.f * 35.f - 2.f;
 
@@ -156,8 +156,8 @@ void HeightMap::genVertices(int x, int z, GLfloat island_size) {
 	width = x;
 	height = z;
 
-	float y_mid = height / 2;
-	float x_mid = width / 2;
+	float y_mid = (float) height / 2;
+	float x_mid = (float) width / 2;
 	float max_width = island_size;
 
 	int index_w = 0, index_h=0;
