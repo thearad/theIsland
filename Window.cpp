@@ -1,11 +1,11 @@
 #include "window.h"
 
 const char* window_title = "Island";
-Cube * cube;
+
 SkyBox * skybox;
 HeightMap* heightmap;
 Water* water;
-ShadowMap * dLightShadow;
+ShadowMap * shadowmap;
 Sphere * sphere;
 GLFWwindow * map;
 glm::mat4 depthMVP;
@@ -22,7 +22,7 @@ GLuint quad_vertexbuffer;
 GLuint texID;
 
 /*Adding ParticleManager variables*/
-ParticleManager* p_mgr;
+ParticleManager* particleManager;
 GLint particleShaderProgram;
 bool renderParticles = true;
 
@@ -47,14 +47,9 @@ bool Window::lbutton_down;
 bool Window::first_time;
 glm::vec3 Window::lastPoint;
 
+ShadowMapDebugger* tester;
 void Window::initialize_objects()
 {
-	glm::mat4 depthViewMatrix, depthProjectionMatrix;
-	depthProjectionMatrix = glm::ortho<float>(-50, 50, -50, 50, -50, 100);
-	
-	depthViewMatrix = glm::lookAt(lightInvDir, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));//lightInvDir is freaking out
-	depthMVP = depthProjectionMatrix * depthViewMatrix * glm::mat4(1.0f);
-
 	// Load the shader program. Make sure you have the correct filepath up top
 	heightmapShaderProgram = LoadShaders(SHADER_PATH "heightmap.vert", SHADER_PATH "heightmap.frag");
 	skyboxShaderProgram = LoadShaders(SHADER_PATH "skybox.vert", SHADER_PATH "skybox.frag");
@@ -65,23 +60,27 @@ void Window::initialize_objects()
 	
 	depthShaderProgram = LoadShaders("depth.vert", "depth.frag");
 	shadowmapShaderProgram = LoadShaders("shadowMap.vert", "shadowMap.frag");
-	//Render objects
-	cube = new Cube();
+	
+	//Create renderable objects
 	water = new Water(200, 200);
 	sphere = new Sphere();
-	//ShadowMap logic with help from: http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-16-shadow-mapping/
-	dLightShadow = new ShadowMap(1280,960);
-
 	std::vector<const GLchar*> faces = {
 		SKYBOX_FACE_DIR "right.jpg", SKYBOX_FACE_DIR "left.jpg", SKYBOX_FACE_DIR "top.jpg",
 		SKYBOX_FACE_DIR "bottom.jpg", SKYBOX_FACE_DIR "back.jpg", SKYBOX_FACE_DIR "front.jpg"
 	};
 	skybox = new SkyBox(faces);
-	staticView = Window::V;
-
 	heightmap = new HeightMap(200, 200);
+	particleManager = new ParticleManager(particleShaderProgram);
 
-	p_mgr = new ParticleManager(particleShaderProgram);
+	//ShadowMap logic with help from: http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-16-shadow-mapping/
+	shadowmap = new ShadowMap(1280, 960);
+	glm::mat4 depthViewMatrix, depthProjectionMatrix;
+	depthProjectionMatrix = glm::ortho<float>(-50, 50, -50, 50, -50, 100);
+	depthViewMatrix = glm::lookAt(lightInvDir, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));//lightInvDir is freaking out
+	
+	depthMVP = depthProjectionMatrix * depthViewMatrix * glm::mat4(1.0f);
+
+	staticView = Window::V;
 
 	static const GLfloat g_quad_vertex_buffer_data[] = {
 		-640.0f, -480.0f, 0.0f,
@@ -98,14 +97,13 @@ void Window::initialize_objects()
 
 	// Create and compile our GLSL program from the shaders
 	quad_programID = LoadShaders("pass.vert", "pass.frag");
-	texID = glGetUniformLocation(quad_programID, "texture_");
+	tester = new ShadowMapDebugger();
 
 }
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
 void Window::clean_up()
 {
-	delete(cube);
 	glDeleteProgram(heightmapShaderProgram);
 }
 
@@ -162,7 +160,6 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 	Window::height = height;
 	// Set the viewport size. This is the only matrix that OpenGL maintains for us in modern OpenGL!
 	glViewport(0, 0, width, height);
-	//dLightShadow = new ShadowMap(640, 480);
 	if (height > 0)
 	{
 		V = camera.GetViewMatrix();
@@ -193,7 +190,7 @@ void Window::poll_movement() {
 	Do_Movement();
 
 	if (renderParticles)
-		p_mgr->generate(deltaTime, 200, 200);
+		particleManager->generate(deltaTime, 200, 200);
 }
 
 glm::vec4 refract_clip = glm::vec4(0.f, -1.f, 0.f, 0.01f);
@@ -206,37 +203,10 @@ void Window::display_callback(GLFWwindow* window)
 	/*FOR TESTING SHADOW MAP*/
 	if (showMap) {
 		glViewport(width / 2, 0, width / 2, height);
-
-		//added this.
 		P = glm::perspective(camera.Zoom, (float)(width / 2) / (float)height, 0.1f, 1000.0f);
 
-		//staticView = V;
-		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glDisable(GL_COMPARE_R_TO_TEXTURE);
-		
 		glUseProgram(quad_programID);
-		
-		// Bind our texture in Texture Unit 0
-		glActiveTexture(GL_TEXTURE8);
-		glBindTexture(GL_TEXTURE_2D, dLightShadow->depth);
-		// Set our "renderedTexture" sampler to user Texture Unit 0
-		glUniform1i(texID, 8);
-
-		glEnableVertexAttribArray(0);
-		glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
-		glVertexAttribPointer(
-			0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-			3,                  // size
-			GL_FLOAT,           // type
-			GL_FALSE,           // normalized?
-			0,                  // stride
-			(void*)0            // array buffer offset
-		);
-
-		// Draw the triangle !
-		// You have to disable GL_COMPARE_R_TO_TEXTURE above in order to see anything !
-		glDrawArrays(GL_TRIANGLES, 0, 6); // 2*3 indices starting at 0 -> 2 triangles
-		glDisableVertexAttribArray(0);
+		tester->draw(quad_programID, shadowmap->depth);
 	}
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glm::mat4 biasMatrix(
@@ -288,7 +258,7 @@ void Window::display_callback(GLFWwindow* window)
 	heightmap->draw(shadowmapShaderProgram);
 	
 	glUseProgram(particleShaderProgram);
-	p_mgr->render(camera);
+	particleManager->render(camera);
 	if (showSun) {
 		glUseProgram(shadowmapShaderProgram);
 		Model = glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3(0.5, 0.5, 0.5)), glm::vec3(3 * glm::vec3(staticView* glm::vec4(lightInvDir, 0)).x, 3 * glm::vec3(staticView* glm::vec4(lightInvDir, 0)).y, glm::vec3(staticView* glm::vec4(lightInvDir, 0)).z + 1));//(staticView * glm::vec4(, 0.0)
@@ -315,7 +285,7 @@ void Window::display_callback(GLFWwindow* window)
 
 	glUseProgram(shadowmapShaderProgram);
 	glActiveTexture(GL_TEXTURE9); //switches texture bind location to GL_TEXTURE(0+i)
-	glBindTexture(GL_TEXTURE_2D, dLightShadow->depth); //bind texture to active location
+	glBindTexture(GL_TEXTURE_2D, shadowmap->depth); //bind texture to active location
 	glUniform1i(glGetUniformLocation(shadowmapShaderProgram, "shadowMap"), 9); //sets uniform sampler2D texSampleri's texture bind loc.
 	glUniformMatrix4fv(glGetUniformLocation(shadowmapShaderProgram, "depthBiasMVP"), 1, GL_FALSE, &depthBiasMVP[0][0]);
 	glUniform3fv(glGetUniformLocation(shadowmapShaderProgram, "lightInvDir"), 1, &lightInvDir[0]);
@@ -328,7 +298,7 @@ void Window::display_callback(GLFWwindow* window)
 	heightmap->draw(shadowmapShaderProgram);
 	//render_scene();
 	glUseProgram(particleShaderProgram);
-	p_mgr->render(camera);
+	particleManager->render(camera);
 
 	glUseProgram(waterShaderProgram);
 	glUniform3f(glGetUniformLocation(waterShaderProgram, "camera_Position"), camera.Position.x, camera.Position.y, camera.Position.z);
@@ -452,7 +422,7 @@ void Window::scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 }
 
 void Window::shadowPass() {
-	dLightShadow->bind();
+	shadowmap->bind();
 	glViewport(0, 0, 1280, 960);
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
@@ -467,6 +437,6 @@ void Window::shadowPass() {
 	//skybox->draw(depthShaderProgram);
 	heightmap->quickDraw();
 
-	dLightShadow->unbind();
+	shadowmap->unbind();
 	glDisable(GL_CULL_FACE);
 }

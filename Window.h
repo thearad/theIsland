@@ -23,6 +23,8 @@
 #include "GLFWStarterProject\Sphere.h"
 #include "GLFWStarterProject\ShadowMap.h"
 
+#include "GLFWStarterProject\ShadowMapDebugger.h"
+
 class Window
 {
 private:
