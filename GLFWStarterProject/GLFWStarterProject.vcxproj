@@ -33,6 +33,7 @@
     <ClInclude Include="..\Water.h" />
     <ClInclude Include="..\Window.h" />
     <ClInclude Include="ShadowMap.h" />
+    <ClInclude Include="ShadowMapDebugger.h" />
     <ClInclude Include="Sphere.h" />
   </ItemGroup>
   <ItemGroup>
@@ -50,6 +51,7 @@
     <ClCompile Include="..\Water.cpp" />
     <ClCompile Include="..\Window.cpp" />
     <ClCompile Include="ShadowMap.cpp" />
+    <ClCompile Include="ShadowMapDebugger.cpp" />
     <ClCompile Include="Sphere.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -186,6 +188,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4244;4101</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
