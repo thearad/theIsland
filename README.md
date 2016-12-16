@@ -3,7 +3,7 @@ Jessica Ng and Ana Radic
 # Links
 * blog: https://cse167aja.wordpress.com/ 
 * project description: http://ivl.calit2.net/wiki/index.php/Project5F16
-* youtube video:
+* youtube video: https://youtu.be/cEAdchsHNpQ
 
 # Controls
 * Camera :
@@ -20,3 +20,4 @@ Jessica Ng and Ana Radic
     * l - Loads user-specified terrain from path "terrain/terrain.ppm"
 * Shadow Mapping:
     * m - Toggle on and off a side-by-side view of the depth buffer.
+    * n - Toggle on and off a sphere which shows the location of the light used for shadow mapping
