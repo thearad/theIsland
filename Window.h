@@ -44,7 +44,7 @@ public:
 	static void resize_callback(GLFWwindow* window, int width, int height);
 	static void idle_callback();
 
-	static void render_scene();
+	static void renderSceneObjects();
 	static void poll_movement();
 	static void display_callback(GLFWwindow*);
 	static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -54,7 +54,11 @@ public:
 	static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 	static void Do_Movement();
-	static void shadowPass();
+	static void renderToShadowDepthBuffer();
+	static void renderToWaterRefractionBuffer();
+	static void renderToWaterReflectionBuffer();
+	static void renderToScreen();
+	static void renderShadowDebugger();
 };
 
 #endif
